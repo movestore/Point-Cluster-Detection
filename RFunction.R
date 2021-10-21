@@ -39,11 +39,11 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     
     result@data$cluster.mid.long <- apply(matrix(result@data$clusterID), 1, function(x) midlon[which(cluID==x)])
     result@data$cluster.mid.lat <- apply(matrix(result@data$clusterID), 1, function(x) midlat[which(cluID==x)])
-    result.df <- as.data.frame(result)
+    result.df <- data.frame(as.data.frame(result),coordinates(result))
     clu.ix <- which(names(result.df) %in% c("clusterID","cluster.mid.long","cluster.mid.lat"))
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
-    #write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
-    write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
+    write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
+    #write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
     
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result@data$clusterID==x)))
@@ -56,8 +56,8 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     
     clu_tab <- data.frame("cluster.ID"=cluID,"mid.long"=midlon,"mid.lat"=midlat,timestamp.start,timestamp.end,duration,n.locs,n.ids,id.names)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
-    #write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
-    write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
+    write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
+    #write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
   } else result <- NULL
   
   # could add n.locs and duration for different individuals
