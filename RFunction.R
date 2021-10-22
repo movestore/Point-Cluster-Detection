@@ -16,13 +16,17 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     dur <- 14
   }
   
+  #tried to include recurse pachage here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
+  
   # cluster for all locations (not by ID)
   coos <- coordinates(data)
   dista <- geodist_vec(x1=coos[,1],y1=coos[,2],measure="vincenty") #unit=m, "geodesic" is probably better, but takes even longer
   
-  clu <- hclust(as.dist(dista),method="ward.D2")
-  memb <- cutree(clu,h=2*rad) #group membership for each location
+  #clu <- hclust(as.dist(dista),method="ward.D2") #measure in dendrogram is not distance
+  clu <- hclust(as.dist(dista),method="average")
   #plot(as.dendrogram(clu), ylim = c(0,1000))
+  #abline(h=400,col=2)
+  memb <- cutree(clu,h=2*rad) #group membership for each location
   
   data@data <- cbind(data@data,"clusterID"=memb)
   cluID_all <- unique(memb)
@@ -52,7 +56,7 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     timestamp.start <- apply(matrix(cluID), 1, function(x) paste(as.character(min(timestamps(result[result@data$clusterID==x]))),"UTC"))
     timestamp.end <- apply(matrix(cluID), 1, function(x) paste(as.character(max(timestamps(result[result@data$clusterID==x]))),"UTC"))
     duration <- as.numeric(difftime(as.POSIXct(timestamp.end), as.POSIXct(timestamp.start),units=dur_unit))
-    
+    # add local timestamps!!
     
     clu_tab <- data.frame("cluster.ID"=cluID,"mid.long"=midlon,"mid.lat"=midlat,timestamp.start,timestamp.end,duration,n.locs,n.ids,id.names)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")

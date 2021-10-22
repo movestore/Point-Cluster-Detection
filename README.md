@@ -8,7 +8,7 @@ Github repository: *github.com/movestore/Point-Cluster_Detection*
 Detection of point clusters, where possibly more than one animal returns to within a specified time interval. Provides a table of each cluster with the times, duration, number of locations and animals.
 
 ## Documentation
-This App uses hierarchical clustering for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. For clustering the Ward methods is used and the clusters are defined at the minimum distance between cluster centres of `2 * cluster radius`. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
+This App uses hierarchical clustering for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. For clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters for this App are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
 
 A cluster overview table is returned as a .csv artefact to download. It included for each cluster the mid location, timestamps of first and last location, duration, number of locations, number of animals and the names of those animals.
 
