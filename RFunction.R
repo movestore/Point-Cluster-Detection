@@ -16,6 +16,17 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     dur <- 14
   }
   
+  # take out "remove" locations from data if there are any
+  remo <- FALSE
+  if (any(namesIndiv(data)=="remove"))
+  {
+    data.split <- move::split(data)
+    ix <- which(names(data.split)=="remove")
+    remove <- data.split[[ix]] #move object
+    data <- moveStack(data.split[-ix])
+    remo <- TRUE
+  }
+
   #tried to include recurse pachage here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
   
   # cluster for all locations (not by ID)
@@ -37,14 +48,28 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   
   if (length(cluID)>0)
   {
-    result <- data[data@data$clusterID %in% cluID] #these are all locations that are in a cluster with difftime>dur
     midlon <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,1])) 
     midlat <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,2])) 
     
+    #take out clusters in rad radius around "remove"
+    if (remo==TRUE) 
+    {
+      remo_dist <- geodist_vec(x1=coordinates(remove)[,1],y1=coordinates(remove)[,2],x2=midlon,y2=midlat,measure="vincenty")
+      if (any(remo_dist<rad))
+      {
+        out <- which(remo_dist<rad,arr.ind=TRUE)[,2]
+        cluID <- cluID[-out]
+        midlon <- midlon[-out]
+        midlat <- midlat[-out]
+      }
+    }
+    
+    result <- data[data@data$clusterID %in% cluID] #these are all locations that are in a (non-remove) cluster with difftime>dur
     result@data$cluster.mid.long <- apply(matrix(result@data$clusterID), 1, function(x) midlon[which(cluID==x)])
     result@data$cluster.mid.lat <- apply(matrix(result@data$clusterID), 1, function(x) midlat[which(cluID==x)])
     result.df <- data.frame(as.data.frame(result),coordinates(result))
     clu.ix <- which(names(result.df) %in% c("clusterID","cluster.mid.long","cluster.mid.lat"))
+ 
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
     write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
