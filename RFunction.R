@@ -28,7 +28,7 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     remove <- data.split[[ix]] #move object
     data <- moveStack(data.split[-ix])
     remo <- TRUE
-    logger.info(paste0("Your data set contains", length(remove), "locations with the ID 'remove'. Clusters close (< rad) to those locations will be removed from your results."))
+    logger.info(paste("Your data set contains", length(remove), "locations with the ID 'remove'. Clusters close (< rad) to those locations will be removed from your results."))
   }
 
   #tried to include recurse package here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
@@ -65,7 +65,7 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
         cluID <- cluID[-out]
         midlon <- midlon[-out]
         midlat <- midlat[-out]
-        logger.info(paste0(out," clusters were removed from your results, because they were close (< rad) to the provided locations with ID 'remove'."))
+        logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< rad) to the provided locations with ID 'remove'."))
       }
     }
     
@@ -80,8 +80,8 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     result.df <- data.frame(as.data.frame(result),coordinates(result))
     clu.ix <- which(names(result.df) %in% c("clusterID","cluster.mid.long","cluster.mid.lat"))
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
-    write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
-    #write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
+    #write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
+    write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
     
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result@data$clusterID==x)))
@@ -106,8 +106,8 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     clu_tab <- data.frame("cluster.ID"=cluID,"mid.long"=midlon,"mid.lat"=midlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,duration,n.locs,n.ids,id.names,id.locs,id.durs)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
-    write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
-    #write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
+    #write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
+    write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
   } else result <- NULL
   
   # the use of package recurse or adehabitatLT does only work on tracks, but not for clusters by all animals...
