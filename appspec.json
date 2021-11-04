@@ -43,6 +43,15 @@
       },
       {
         "name": "geodist"
+      },
+	  {
+        "name": "lubridate"
+      },
+	  {
+        "name": "lutz"
+      },
+	  {
+        "name": "sf"
       }
     ]
   },
