@@ -87,7 +87,9 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     result@data$date.local <- format(as.POSIXct(result@data$timestamp.local),format="%Y-%m-%d")
     result@data$time.local <- format(as.POSIXct(result@data$timestamp.local),format="%H:%M:%S")
     
-    result.df <- data.frame(as.data.frame(result),coordinates(result))
+    coo <- coordinates(result)
+    names(coo) <- c("location.long","location.lat")
+    result.df <- data.frame(as.data.frame(result),coo)
     names(result.df) <- make.names(names(result.df),allow_=FALSE)
     clu.ix <- which(names(result.df) %in% c("clusterID","clu.centr.long","clu.centr.lat"))
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
@@ -129,8 +131,8 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     result@data$clu.duration <- apply(matrix(result@data$clusterID), 1, function(x) duration[which(cluID==x)])
     result.df <- cbind(result.df,"clu.duration"=result@data$clu.duration)
     
-    result.df.csv <- result.df[,c("clusterID","trackId","tag.local.identifier","coords.x1","coords.x2","timestamp.local","date.local","time.local","local.timezone","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration")] #height and utm are not general enough!
-    names(result.df.csv)[2:5] <- c("animalID","tagID","location.long","location.lat")
+    result.df.csv <- result.df[,c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration")]
+    names(result.df.csv)[2] <- c("animalID")
     
     #for utm locations we would need a separate App
     
