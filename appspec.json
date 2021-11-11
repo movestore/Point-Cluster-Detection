@@ -39,7 +39,7 @@
   "dependencies": {
     "R": [
       {
-        "name": "lubridate"
+        "name": "lubridate",
 		"version": "1.7.10"
       },
 	  {
