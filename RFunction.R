@@ -136,7 +136,7 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     
     #for utm locations we would need a separate App
     
-    write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
+    write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
     #force moveStack if only one ID (can lead to strange error)

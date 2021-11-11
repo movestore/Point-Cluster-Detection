@@ -2,7 +2,7 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "App-Output Workflow_Instance_001__Thin_Data_by_Time__2021-11-10_13-03-14.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output Workflow_Instance_001__Movebank__2021-11-11_11-02-25.rds" #important to set to NULL for movebank-download
 outputFileName = "output.rds"
 
 args <- list()
@@ -18,8 +18,8 @@ args <- list()
 
 # Add your arguments of your r function here
 args[["rad"]] = 200 #m - double
-args[["dur"]] = 14 #days - double
-args[["dur_unit"]] = "days" #"hours","weeks"
+args[["dur"]] = 1 #days - double
+args[["dur_unit"]] = "hours" #"hours","weeks"
 
 
 #################################################################
