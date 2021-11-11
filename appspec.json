@@ -10,8 +10,8 @@
 	{
       "id": "dur",
       "name": "Minimum duration at a cluster",
-      "description": "Provide the minimum time duration (select unit below) that your animals need to be present at a cluster for including it in your results. Defaults to 14 (days).",
-      "defaultValue": 14,
+      "description": "Provide the minimum time duration (select unit below) that your animals need to be present at a cluster for including it in your results. Defaults to 1 (day).",
+      "defaultValue": 1,
       "type": "DOUBLE"
     },
 	{
@@ -39,13 +39,14 @@
   "dependencies": {
     "R": [
       {
+        "name": "lubridate"
+		"version": "1.7.10"
+      },
+	  {
         "name": "move"
       },
       {
         "name": "geodist"
-      },
-	  {
-        "name": "lubridate"
       },
 	  {
         "name": "lutz"
@@ -87,7 +88,12 @@
       "affiliation": "North Carolina Zoo",
       "affiliationRor": ""
     }
-
+  ],
+  "funding": [
+    {
+	"name": "North Carolina Zoo",
+	"comment": "grant for Point Cluster Workflow (NCZoo)"
+	}
   ],
   "documentation" : {
     "url": "https://github.com/movestore/Point-Cluster-Detection/blob/main/README.md"

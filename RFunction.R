@@ -1,12 +1,13 @@
 library('move')
 library('geodist')
-library('lubridate')
+library('lubridate') #version x.7.y!
 library('lutz')
 library('sf')
 
 rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   
-  Sys.setenv(tz="UTC") 
+  Sys.setenv(tz="UTC")
+  names(data) <- make.names(names(data),allow_=FALSE)
   
   if (is.null(rad))
   {
@@ -52,65 +53,97 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   
   if (length(cluID)>0)
   {
-    midlon <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,1])) 
-    midlat <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,2])) 
+    #midlon <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,1])) 
+    #midlat <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,2])) 
+    
+    centrloc <- t(apply(matrix(cluID), 1, function(x) coordinates(data[data@data$clusterID==x])[min(which(rowMeans(geodist_vec(x1=coordinates(data[data@data$clusterID==x])[,1],y1=coordinates(data[data@data$clusterID==x])[,2],measure="vincenty"))==min(rowMeans(geodist_vec(x1=coordinates(data[data@data$clusterID==x])[,1],y1=coordinates(data[data@data$clusterID==x])[,2],measure="vincenty"))))),]))
+    
+    centrlon <- centrloc[,1]
+    centrlat <- centrloc[,2]
+    
     
     #take out clusters in rad radius around "remove"
     if (remo==TRUE) 
     {
-      remo_dist <- geodist_vec(x1=coordinates(remove)[,1],y1=coordinates(remove)[,2],x2=midlon,y2=midlat,measure="vincenty")
+      remo_dist <- geodist_vec(x1=coordinates(remove)[,1],y1=coordinates(remove)[,2],x2=centrlon,y2=centrlat,measure="vincenty")
       if (any(remo_dist<rad))
       {
         out <- which(remo_dist<rad,arr.ind=TRUE)[,2]
         cluID <- cluID[-out]
-        midlon <- midlon[-out]
-        midlat <- midlat[-out]
-        logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< rad) to the provided locations with ID 'remove'."))
+        centrlon <- centrlon[-out]
+        centrlat <- centrlat[-out]
+        logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< ",rad," m) to the provided locations with ID 'remove'."))
       }
     }
     
     result <- data[data@data$clusterID %in% cluID] #these are all locations that are in a (non-remove) cluster with difftime>dur
     result@data <- result@data[,!sapply(result@data, function(x) all(is.na(x)))]
-    result@data$cluster.mid.long <- apply(matrix(result@data$clusterID), 1, function(x) midlon[which(cluID==x)])
-    result@data$cluster.mid.lat <- apply(matrix(result@data$clusterID), 1, function(x) midlat[which(cluID==x)])
+    result@data$clu.centr.long <- apply(matrix(result@data$clusterID), 1, function(x) centrlon[which(cluID==x)])
+    result@data$clu.centr.lat <- apply(matrix(result@data$clusterID), 1, function(x) centrlat[which(cluID==x)])
     
     tz_info_result <- tz_lookup_coords(coordinates(result)[,2], coordinates(result)[,1], method = "accurate")
     result@data$timestamp.local <- apply(data.frame(timestamps(result),tz_info_result), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
+    result@data$local.timezone <- tz_info_result 
+    result@data$date.local <- format(as.POSIXct(result@data$timestamp.local),format="%Y-%m-%d")
+    result@data$time.local <- format(as.POSIXct(result@data$timestamp.local),format="%H:%M:%S")
     
     result.df <- data.frame(as.data.frame(result),coordinates(result))
-    clu.ix <- which(names(result.df) %in% c("clusterID","cluster.mid.long","cluster.mid.lat"))
+    names(result.df) <- make.names(names(result.df),allow_=FALSE)
+    clu.ix <- which(names(result.df) %in% c("clusterID","clu.centr.long","clu.centr.lat"))
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
-    #write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
-    write.csv(result.df,file="Points_With_Clusters.csv",row.names=FALSE) 
+    heightix <- min(grep("height",names(result.df)))
+    heightname <- names(result.df)[heightix]
     
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result@data$clusterID==x)))
     n.ids <- apply(matrix(cluID), 1, function(x) length(unique(result.df$trackId[result.df$clusterID==x])))
     id.names <- apply(matrix(cluID), 1, function(x) paste(unique(result.df$trackId[result.df$clusterID==x]),collapse=", "))
+    id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result.df$tag.local.identifier[result.df$clusterID==x]),collapse=", "))
     
     id.locs <- id.durs <- character(length(cluID))
     for (i in seq(along=cluID))
     {
       idsi <- as.character(unique(result.df$trackId[result.df$clusterID==cluID[i]]))
       id.locs[i] <- paste(apply(matrix(idsi), 1, function(x) length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ")
-      id.durs[i] <- paste(apply(matrix(idsi), 1, function(x) round(as.numeric(difftime(max(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]]),min(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]]),units="days")),2)),collapse=", ")
+      id.durs[i] <- paste(apply(matrix(idsi), 1, function(x) round(as.numeric(difftime(max(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),min(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),units="days")),1)),collapse=", ")
     }
     timestamp.start <- apply(matrix(cluID), 1, function(x) paste(as.character(min(timestamps(result[result@data$clusterID==x]))),"UTC"))
     timestamp.end <- apply(matrix(cluID), 1, function(x) paste(as.character(max(timestamps(result[result@data$clusterID==x]))),"UTC"))
     duration <- as.numeric(difftime(as.POSIXct(timestamp.end), as.POSIXct(timestamp.start),units=dur_unit))
     
-    tz_info_clu<- tz_lookup_coords(midlat, midlon, method = "accurate")
+    cluster.diameter.m <- apply(matrix(cluID), 1, function(x) max(geodist_vec(x1=coordinates(data[data@data$clusterID==x])[,1],y1=coordinates(data[data@data$clusterID==x])[,2],measure="vincenty"),na.rm=TRUE))
+    realised.centr.radius.m <- apply(matrix(cluID), 1, function(x) max(geodist_vec(x1=coordinates(data[data@data$clusterID==x])[,1],y1=coordinates(data[data@data$clusterID==x])[,2],x2=centrlon[which(cluID==x)],y2=centrlat[which(cluID==x)],measure="vincenty"),na.rm=TRUE))
+    
+    tz_info_clu<- tz_lookup_coords(centrlat, centrlon, method = "accurate")
     timestamp.start.local <- apply(data.frame(timestamp.start,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     timestamp.end.local <- apply(data.frame(timestamp.end,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     
-    clu_tab <- data.frame("cluster.ID"=cluID,"mid.long"=midlon,"mid.lat"=midlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,duration,n.locs,n.ids,id.names,id.locs,id.durs)
+    clu_tab <- data.frame("cluster.ID"=cluID,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,cluster.diameter.m,realised.centr.radius.m,n.locs,n.ids,id.names,id.tags,id.locs,id.durs)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
-    #write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
-    write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
+    
+    write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
+    #write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
+    
+    # finish points with clusters table, add clu.duration for Email Alert App
+    result@data$clu.duration <- apply(matrix(result@data$clusterID), 1, function(x) duration[which(cluID==x)])
+    result.df <- cbind(result.df,"clu.duration"=result@data$clu.duration)
+    
+    result.df.csv <- result.df[,c("clusterID","trackId","tag.local.identifier","coords.x1","coords.x2","timestamp.local","date.local","time.local","local.timezone","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration")] #height and utm are not general enough!
+    names(result.df.csv)[2:5] <- c("animalID","tagID","location.long","location.lat")
+    
+    #for utm locations we would need a separate App
+    
+    write.csv(result.df,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
+    #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
+    
+    #force moveStack if only one ID (can lead to strange error)
+    if (is(result,'Move')) {
+      result <- moveStack(result,forceTz="UTC")
+    }
+    
   } else result <- NULL
   
   # the use of package recurse or adehabitatLT does only work on tracks, but not for clusters by all animals...
-  
   return(result)
 }

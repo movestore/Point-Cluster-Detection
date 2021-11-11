@@ -2,7 +2,7 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "input_vulture.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output Workflow_Instance_001__Thin_Data_by_Time__2021-11-10_13-03-14.rds" #important to set to NULL for movebank-download
 outputFileName = "output.rds"
 
 args <- list()
