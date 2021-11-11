@@ -139,6 +139,9 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
+    sel <- which(names(result@data) %in% c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration"))
+    result@data <- data.frame(result@data[sel],result@data[-sel])
+   
     #force moveStack if only one ID (can lead to strange error)
     if (is(result,'Move')) {
       result <- moveStack(result,forceTz="UTC")
