@@ -12,9 +12,9 @@ This App uses hierarchical clustering for the detection of point clusters where 
 
 If one has uploaded a file of locations with individual.local.identifier="remove" in a preceding App, this App will automatically exclude those locations from the analysis and after the clustering exclude those clusters that have centre points less than `rad` metre from the locations of "remove". That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
 
-A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the mid location, timestamps of first and last location (UTC and local time), duration, number of locations, number of animals, the names of those animals and their respective duration and number of locations in the cluster.
+A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster.
 
-The output of the App includes only the locations that could be attributed to a cluster that fulfilled the minimum duration requirement. This dataset is also returned as a .csv artefact to download.
+The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement). This dataset is also returned as a .csv artefact to download, including local timestamps.
 
 ### Input data
 moveStack in Movebank format
