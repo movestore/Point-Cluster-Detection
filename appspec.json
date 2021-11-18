@@ -8,12 +8,12 @@
       "type": "RADIOBUTTONS",
       "options": [
 		{
-          "value": "buffer",
-          "displayText": "."
+          "value": "buff",
+          "displayText": "Buffer clustering with overlap union."
         },
 		{
           "value": "hclust",
-          "displayText": "."
+          "displayText": "Hierarchical clustering with average linkage."
         }
       ]
     },
