@@ -8,7 +8,11 @@ Github repository: *github.com/movestore/Point-Cluster_Detection*
 Detection of point clusters, where possibly more than one animal returns to within a specified time interval. Provides a table of each cluster with the times, duration, number of locations and animals. Clusters close to locations of ID "remove" can be excluded.
 
 ## Documentation
-This App uses hierarchical clustering for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. For clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters for this App are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
+This App uses two types of clustering (buffer overlap or hierarchical clustering) for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. 
+
+For buffer clustering all locations are transformed into a circular spatial polygon of radius `cluster radius`. Then all overlapping polygons (i.e. of which the center locations are less than `2 * cluster radius` apart) are joined into clusters. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
+
+For hierarchical clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
 
 If one has uploaded a file of locations with individual.local.identifier="remove" in a preceding App, this App will automatically exclude those locations from the analysis and after the clustering exclude those clusters that have centre points less than `rad` metre from the locations of "remove". That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
 

@@ -1,6 +1,23 @@
 {
   "settings": [
-    {
+	{
+      "id": "meth",
+      "name": "Cluster Method",
+      "description": "Select which clustering method you want to use.",
+      "defaultValue": "buff",
+      "type": "RADIOBUTTONS",
+      "options": [
+		{
+          "value": "buffer",
+          "displayText": "."
+        },
+		{
+          "value": "hclust",
+          "displayText": "."
+        }
+      ]
+    },
+	{
       "id": "rad",
       "name": "Cluster radius",
       "description": "Define the radius (in m) within which your locations shall lie to define a cluster. Defaults to 200 m.",

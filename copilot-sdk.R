@@ -17,6 +17,7 @@ args <- list()
 #    args[["password"]] = "any-password"
 
 # Add your arguments of your r function here
+args[["meth"]] = "buff" #"buff", "hclust"
 args[["rad"]] = 200 #m - double
 args[["dur"]] = 1 #days - double
 args[["dur_unit"]] = "hours" #"hours","weeks"

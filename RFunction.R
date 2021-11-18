@@ -3,9 +3,9 @@ library('geodist')
 library('lubridate') #version x.7.y!
 library('lutz')
 library('sf')
+library('sp')
 
-rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
-  
+rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   Sys.setenv(tz="UTC")
   names(data) <- make.names(names(data),allow_=FALSE)
   
@@ -36,14 +36,28 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   
   # cluster for all locations (not by ID)
   coos <- coordinates(data)
-  dista <- geodist_vec(x1=coos[,1],y1=coos[,2],measure="vincenty") #unit=m, "geodesic" is probably better, but takes even longer
   
-  #clu <- hclust(as.dist(dista),method="ward.D2") #measure in dendrogram is not distance
-  clu <- hclust(as.dist(dista),method="average")
-  #plot(as.dendrogram(clu), ylim = c(0,1000))
-  #abline(h=400,col=2)
-  memb <- cutree(clu,h=2*rad) #group membership for each location
-  
+  if (meth=="buff")
+  {
+    data_eq <- spTransform(data,CRSobj=paste0("+proj=aeqd +lat_0=",mean(coos[,2])," +lon_0=",mean(coos[,1])," +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
+    data_eq_buffer <- buffer(data_eq,rad)
+    data_eq_buffer_disag <- disaggregate(data_eq_buffer)
+    
+    data_eq_extr <- extract(data_eq_buffer_disag,SpatialPoints(data_eq))
+    #plot(data_eq_buffer_disag,col=rainbow(26))
+    #points(SpatialPoints(data_eq),col=data_eq_extr$poly.ID,pch=20,cex=5)
+    memb <- data_eq_extr$poly.ID
+  } else if (meth=="hclust")
+  {
+    dista <- geodist_vec(x1=coos[,1],y1=coos[,2],measure="vincenty") #unit=m, "geodesic" is probably better, but takes even longer
+    
+    #clu <- hclust(as.dist(dista),method="ward.D2") #measure in dendrogram is not distance
+    clu <- hclust(as.dist(dista),method="average")
+    #plot(as.dendrogram(clu), ylim = c(0,1000))
+    #abline(h=400,col=2)
+    memb <- cutree(clu,h=2*rad) #group membership for each location
+  }
+
   data@data <- cbind(data@data,"clusterID"=memb)
   cluID_all <- unique(memb)
   
@@ -107,7 +121,7 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     {
       idsi <- as.character(unique(result.df$trackId[result.df$clusterID==cluID[i]]))
       id.locs[i] <- paste(apply(matrix(idsi), 1, function(x) length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ")
-      id.durs[i] <- paste(apply(matrix(idsi), 1, function(x) round(as.numeric(difftime(max(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),min(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),units="days")),1)),collapse=", ")
+      id.durs[i] <- paste(apply(matrix(idsi), 1, function(x) round(as.numeric(difftime(max(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),min(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),units=dur_unit)),1)),collapse=", ")
     }
     timestamp.start <- apply(matrix(cluID), 1, function(x) paste(as.character(min(timestamps(result[result@data$clusterID==x]))),"UTC"))
     timestamp.end <- apply(matrix(cluID), 1, function(x) paste(as.character(max(timestamps(result[result@data$clusterID==x]))),"UTC"))
@@ -120,27 +134,33 @@ rFunction = function(rad=NULL, dur=NULL, dur_unit="days", data, ...) {
     timestamp.start.local <- apply(data.frame(timestamp.start,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     timestamp.end.local <- apply(data.frame(timestamp.end,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     
-    clu_tab <- data.frame("cluster.ID"=cluID,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,cluster.diameter.m,realised.centr.radius.m,n.locs,n.ids,id.names,id.tags,id.locs,id.durs)
+    clu_tab <- data.frame("cluster.ID"=cluID,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,n.locs,n.ids,id.names,id.tags,id.locs,id.durs,cluster.diameter.m,realised.centr.radius.m)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
+    
+    o <- order(clu_tab$n.ids,clu_tab$n.locs,decreasing=TRUE)
+    clu_tab <- clu_tab[o,]
     
     write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
     #write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
     
-    # finish points with clusters table, add clu.duration for Email Alert App
-    result@data$clu.duration <- apply(matrix(result@data$clusterID), 1, function(x) duration[which(cluID==x)])
-    result.df <- cbind(result.df,"clu.duration"=result@data$clu.duration)
+    # finish points with clusters table, add n.ids and n.locs for Email Alert App
+    result@data$n.ids <- apply(matrix(result@data$clusterID), 1, function(x) n.ids[which(cluID==x)])
+    result@data$n.locs <- apply(matrix(result@data$clusterID), 1, function(x) n.locs[which(cluID==x)])
+    result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs)
     
-    result.df.csv <- result.df[,c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration")]
+    result.df.csv <- result.df[,c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","n.ids","n.locs")]
     names(result.df.csv)[2] <- c("animalID")
-    
+    result@data$animalID <- result.df.csv$animalID
+     
     #for utm locations we would need a separate App
     
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
-    sel <- which(names(result@data) %in% c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","clu.duration"))
-    result@data <- data.frame(result@data[sel],result@data[-sel])
+    selnames <- c("clusterID","animalID","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","n.ids","n.locs")
+    sel <- which(names(result@data) %in% selnames)
+    result@data <- data.frame(result@data[,selnames],result@data[-sel])
    
     #force moveStack if only one ID (can lead to strange error)
     if (is(result,'Move')) {
