@@ -33,6 +33,8 @@ moveStack in Movebank format
 `Points_With_Clusters.csv`: Result data set as .csv, with all locations in clusters.
 
 ### Parameters 
+`meth`: Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
+
 `rad`: Radius within which locations have to lie to be defined as a cluster. Unit = metre. Default 200 m.
 
 `dur`: Duration that a cluster has to be repeatadly visited. Unit below. Default 14.
@@ -40,6 +42,8 @@ moveStack in Movebank format
 `dur_unit`: Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
 
 ### Null or error handling:
+**Parameter `meth`:** Default `buff` allows no NULL.
+
 **Parameter `rad`:** Radius NULL defaults to 200 m. Too small radii might lead to small clusters, please include location inaccuracies here.
 
 **Parameter `dur`:** Duration NULL defaults to 14 (days). Too large durations might lead to few clusters.
