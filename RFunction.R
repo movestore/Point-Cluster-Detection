@@ -4,6 +4,7 @@ library('lubridate') #version x.7.y!
 library('lutz')
 library('sf')
 library('sp')
+library('rgeos')
 
 rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...) {
   Sys.setenv(tz="UTC")
@@ -27,7 +28,9 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     data.split <- move::split(data)
     ix <- which(names(data.split)=="remove")
     remove <- data.split[[ix]] #move object
-    data <- moveStack(data.split[-ix])
+    logger.info("Before moveStack()")
+    data <- moveStack(data.split[-ix],forceTz="UTC")
+    logger.info("After moveStack()")
     remo <- TRUE
     logger.info(paste("Your data set contains", length(remove), "locations with the ID 'remove'. Clusters close (< rad) to those locations will be removed from your results."))
   }
@@ -40,12 +43,16 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
   if (meth=="buff")
   {
     data_eq <- spTransform(data,CRSobj=paste0("+proj=aeqd +lat_0=",mean(coos[,2])," +lon_0=",mean(coos[,1])," +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
+    logger.info("before buffer")
     data_eq_buffer <- buffer(data_eq,rad)
+    logger.info("before disaggregate")
     data_eq_buffer_disag <- disaggregate(data_eq_buffer)
     
+    logger.info("before extract")
     data_eq_extr <- extract(data_eq_buffer_disag,SpatialPoints(data_eq))
     #plot(data_eq_buffer_disag,col=rainbow(26))
     #points(SpatialPoints(data_eq),col=data_eq_extr$poly.ID,pch=20,cex=5)
+    logger.info("after extract, left of only member assignment")
     memb <- data_eq_extr$poly.ID
   } else if (meth=="hclust")
   {
