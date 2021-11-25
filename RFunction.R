@@ -101,7 +101,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     result@data$date.local <- format(as.POSIXct(result@data$timestamp.local),format="%Y-%m-%d")
     result@data$time.local <- format(as.POSIXct(result@data$timestamp.local),format="%H:%M:%S")
     
-    coo <- coordinates(result)
+    coo <- data.frame(coordinates(result))
     names(coo) <- c("location.long","location.lat")
     result.df <- data.frame(as.data.frame(result),coo)
     names(result.df) <- make.names(names(result.df),allow_=FALSE)
@@ -159,6 +159,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
     selnames <- c("clusterID","animalID","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","n.ids","n.locs")
+    result@data <- data.frame(result@data,coo)
     sel <- which(names(result@data) %in% selnames)
     result@data <- data.frame(result@data[,selnames],result@data[-sel])
    
