@@ -30,6 +30,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     data <- data[[-ix]]
     remo <- TRUE
     logger.info(paste("Your data set contains", length(remove), "locations with the ID 'remove'. Clusters close (< rad) to those locations will be removed from your results."))
+    logger.info(paste("Your remaining data set has", length(data), "locations of", length(namesIndiv(data)),"indificduals."))
   }
 
   #tried to include recurse package here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
@@ -134,7 +135,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     timestamp.start.local <- apply(data.frame(timestamp.start,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     timestamp.end.local <- apply(data.frame(timestamp.end,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     
-    clu_tab <- data.frame("cluster.ID"=cluID,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start,timestamp.end,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,n.locs,n.ids,id.names,id.tags,id.locs,id.durs,cluster.diameter.m,realised.centr.radius.m)
+    clu_tab <- data.frame("cluster.ID"=cluID,n.locs,n.ids,id.tags,id.locs,id.durs,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,timestamp.start,timestamp.end,id.names,cluster.diameter.m,realised.centr.radius.m)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
     
@@ -149,16 +150,18 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     result@data$n.locs <- apply(matrix(result@data$clusterID), 1, function(x) n.locs[which(cluID==x)])
     result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs)
     
-    result.df.csv <- result.df[,c("clusterID","trackId","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","n.ids","n.locs")]
-    names(result.df.csv)[2] <- c("animalID")
+    result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")]
+    names(result.df.csv)[names(result.df.csv)=="trackId"] <- c("animalID")
+    names(result.df.csv)[names(result.df.csv)=="tag.local.identifier"] <- c("tagID")
     result@data$animalID <- result.df.csv$animalID
+    result@data$tagID <- result.df.csv$tagID
      
     #for utm locations we would need a separate App
     
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
-    selnames <- c("clusterID","animalID","timestamp.local","date.local","time.local","local.timezone","location.long","location.lat","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat","n.ids","n.locs")
+    selnames <- c("clusterID","tagID","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")
     result@data <- data.frame(result@data,coo)
     sel <- which(names(result@data) %in% selnames)
     result@data <- data.frame(result@data[,selnames],result@data[-sel])

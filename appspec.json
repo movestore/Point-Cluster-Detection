@@ -3,7 +3,7 @@
 	{
       "id": "meth",
       "name": "Cluster Method",
-      "description": "Select which clustering method you want to use.",
+      "description": "Select which clustering method you want to use. See details in the App's documentation.",
       "defaultValue": "buff",
       "type": "RADIOBUTTONS",
       "options": [
