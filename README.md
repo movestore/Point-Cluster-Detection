@@ -32,6 +32,77 @@ moveStack in Movebank format
 
 `Points_With_Clusters.csv`: Result data set as .csv, with all locations in clusters.
 
+### Table column definitions
+
+####`Cluster_Table.csv`
+
+clusterID:				ID of cluster
+
+centr.long:				longitude of most central positon in cluster (minimum average distance to all other locations)
+
+centr.lat:				latitutde of most central position in cluster (minimum average distance to all other locations)
+
+timestamp.start:			time of first location in cluster (UTC, format=YYYY-MM-DD HH:MM:SS)
+
+timestamp.end:			time of last location in cluster (UTC, format=YYYY-MM-DD HH:MM:SS)
+
+timestamp.start.local:	local timestamp of first location in cluster (format=YYYY-MM-DD HH:MM:SS)
+
+timestamp.end.local:		local timestamp of last location in cluster (format=YYYY-MM-DD HH:MM:SS)
+
+local.timezone:			name of local timezone (incl. closest large city)
+
+duration (hours):		time duration between first and last location in cluster (unit=hours)
+
+n.locs:					number of locations in cluster (independent of individual)
+
+n.ids:					number of different individuals using the cluster
+
+id.names:				animalIDs of all indiviuals using the cluster (comma separated)
+
+id.tags:					tagIDs of the tags of all individuals using the cluster (comma separated)
+
+id.locs:					number of locations of each individual in the cluster (comma separated, same order as id.names)
+
+id.durs (hours):			time duration between first and last location in cluster of each individual (unit=hours, same order as id.names, zero if only one location of the individual in the cluster)
+
+cluster.diameter.m:		maximum pairwise distance between all locations of the cluster (unit=metres)
+
+realised.centr.radius.m:	realised cluster radius towards most central position, i.e. maximum distance of cluster locations to most central position in cluster (see above, unit=metres)
+
+####`Points_With_Clusters.csv`
+
+clusterID:			ID of cluster in which the location lies
+
+animalID:			animalID of the animal to which the location belongs
+
+timestamp.local:	local timezone timestamp of the location (format=YYYY-MM-DD HH:MM:SS)
+
+date.local:			date of local timezone timestamp (format: YYYY-MM-DD)
+
+time.local:			time of local timezone timestamp (format: HH:MM:SS)
+
+local.timezone:		name of local timezone (incl. closest large city)
+
+location.long:		longitude of location as measured by tag (GPS)
+
+location.lat:		latitude of location as measured by tag (GPS)
+
+ground.speed:		ground speed as measured by tag (GPS, unit: m/s, see you data set)
+
+heading:			heading as measured by tag (GPS, unit: degrees, see you data set)
+
+height.raw:			raw altitude as measured by tag (GPS, unit:m, see you data set)
+
+clu.centr.long:		longitude of most central positon in cluster  to which this location belongs
+
+clu.centr.lat:		latitutde of most central position in cluster to which this location belongs
+
+n.ids:				number of individuals using the cluster to which this location belongs
+
+n.locs:				number of locations forming the cluster to which this location belongs
+
+
 ### Parameters 
 `meth`: Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
 

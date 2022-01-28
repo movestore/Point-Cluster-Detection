@@ -111,8 +111,11 @@
   ],
   "funding": [
     {
-	"name": "North Carolina Zoo",
-	"comment": "grant for Point Cluster Workflow (NCZoo)"
+	"name": "North Carolina Zoo"
+	},
+	{
+	"name": "Wildlife Protection Solutions",
+	"comment": "grant for Location Cluster Workflow (to NCZoo)"
 	}
   ],
   "documentation" : {
