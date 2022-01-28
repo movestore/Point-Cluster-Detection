@@ -150,7 +150,9 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     result@data$n.locs <- apply(matrix(result@data$clusterID), 1, function(x) n.locs[which(cluID==x)])
     result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs)
     
-    result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")]
+    ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
+    result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]]
+    
     names(result.df.csv)[names(result.df.csv)=="trackId"] <- c("animalID")
     names(result.df.csv)[names(result.df.csv)=="tag.local.identifier"] <- c("tagID")
     result@data$animalID <- result.df.csv$animalID
@@ -161,7 +163,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
-    selnames <- c("clusterID","tagID","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")
+    selnames <- c("clusterID","tagID","n.ids","n.locs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]
     result@data <- data.frame(result@data,coo)
     sel <- which(names(result@data) %in% selnames)
     result@data <- data.frame(result@data[,selnames],result@data[-sel])
