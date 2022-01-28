@@ -27,7 +27,7 @@ moveStack in Movebank format
 moveStack in Movebank format
 
 
-### Artefacts
+### Products (Artefacts)
 `Cluster_Table.csv`: Overview of properties of detected point clusters.
 
 `Points_With_Clusters.csv`: Result data set as .csv, with all locations in clusters.
