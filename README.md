@@ -34,7 +34,7 @@ moveStack in Movebank format
 
 ### Table column definitions
 
-####`Cluster_Table.csv`
+#### `Cluster_Table.csv`
 
 clusterID:				ID of cluster
 
@@ -70,7 +70,7 @@ cluster.diameter.m:		maximum pairwise distance between all locations of the clus
 
 realised.centr.radius.m:	realised cluster radius towards most central position, i.e. maximum distance of cluster locations to most central position in cluster (see above, unit=metres)
 
-####`Points_With_Clusters.csv`
+#### `Points_With_Clusters.csv`
 
 clusterID:			ID of cluster in which the location lies
 
