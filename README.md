@@ -70,6 +70,11 @@ cluster.diameter.m:		maximum pairwise distance between all locations of the clus
 
 realised.centr.radius.m:	realised cluster radius towards most central position, i.e. maximum distance of cluster locations to most central position in cluster (see above, unit=metres)
 
+id.locsout: number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by any individual (i.e. can be edgle locations before/after the respective individual has started/ended using the cluster
+
+id.locsBETout: number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by that specific individual (i.e. between the first and last visit of the indiviual to that cluster)
+
+
 #### `Points_With_Clusters.csv`
 
 clusterID:			ID of cluster in which the location lies
