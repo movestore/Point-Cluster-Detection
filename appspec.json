@@ -51,7 +51,36 @@
           "displayText": "week(s)"
         }
       ]
-    }	
+    },
+,
+	{
+      "id": "maxgap",
+      "name": "Maximim gap duration between locations in a cluster",
+      "description": "Provide the maximum time gap that you allow between locations in a cluster (indep. of individual). Clusters will be split if there are larger gaps. Defaults to 1 (day).",
+      "defaultValue": 1,
+      "type": "DOUBLE"
+    },
+	{
+      "id": "gap_unit",
+      "name": "Gap duration unit",
+      "description": "Select the unit for your gap time variable.",
+      "defaultValue": "days",
+      "type": "DROPDOWN",
+      "options": [
+        {
+          "value": "hours",
+          "displayText": "hour(s)"
+        },
+		{
+          "value": "days",
+          "displayText": "day(s)"
+        },
+		{
+          "value": "weeks",
+          "displayText": "week(s)"
+        }
+      ]
+    }		
   ],
   "dependencies": {
     "R": [

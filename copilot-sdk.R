@@ -2,7 +2,7 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "App-Output Example_data_set_vultures_Africa__Cloud_Storage__2021-10-25_10-18-02.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output African_Vultures__Cloud_Storage__2022-01-28_09-35-06.rds" #important to set to NULL for movebank-download
 outputFileName = "output.rds"
 
 args <- list()
@@ -21,6 +21,8 @@ args[["meth"]] = "buff" #"buff", "hclust"
 args[["rad"]] = 200 #m - double
 args[["dur"]] = 1 #days - double
 args[["dur_unit"]] = "hours" #"hours","weeks"
+args[["maxgap"]] = 24 #
+args[["gap_unit"]] = "hours" #"hours","days","weeks"
 
 
 #################################################################

@@ -10,7 +10,7 @@ Detection of point clusters, where possibly more than one animal returns to with
 ## Documentation
 This App uses two types of clustering (buffer overlap or hierarchical clustering) for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. 
 
-For buffer clustering all locations are transformed into a circular spatial polygon of radius `cluster radius`. Then all overlapping polygons (i.e. of which the center locations are less than `2 * cluster radius` apart) are joined into clusters. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
+For buffer clustering all locations are transformed into a circular spatial polygon of radius `cluster radius`. Then all overlapping polygons (i.e. of which the center locations are less than `2 * cluster radius` apart) are joined into clusters. Only clusters that were used for at least the specified number of hours/days/weeks (dur parameter) are returned. Clusters with time gaps between successive (indiv. independent) locations above the user defined maximum (maxgap parameter) are split. Resulting partial clusters are kept if they fulfill the minimum duration requirement (dur parameter).
 
 For hierarchical clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
 
@@ -117,6 +117,10 @@ n.locs:				number of locations forming the cluster to which this location belong
 
 `dur_unit`: Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
 
+`maxgap`: Maximum tolerated gap duration between successive locations in a cluster. Individuals to who the loations belong are irrelevant. Clusters are split at gaps exceeding this maximum gap duration. Unit below. Default 1.
+
+`gap_unit`: Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
+
 ### Null or error handling:
 **Parameter `meth`:** Default `buff` allows no NULL.
 
@@ -125,5 +129,9 @@ n.locs:				number of locations forming the cluster to which this location belong
 **Parameter `dur`:** Duration NULL defaults to 14 (days). Too large durations might lead to few clusters.
 
 **Parameter `dur_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
+
+**Parameter `maxgap`:** Duration NULL defaults to 1 (day). Too small maximum gaps might lead to fewer and smaller clusters.
+
+**Parameter `gap_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
 
 **Data:** All locations that are in a (any) cluster are returned to the next App. If no clusters are found in your data set NULL is returned, likel with an error.

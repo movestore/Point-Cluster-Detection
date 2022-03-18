@@ -30,7 +30,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     data <- data[[-ix]]
     remo <- TRUE
     logger.info(paste("Your data set contains", length(remove), "locations with the ID 'remove'. Clusters close (< rad) to those locations will be removed from your results."))
-    logger.info(paste("Your remaining data set has", length(data), "locations of", length(namesIndiv(data)),"indificduals."))
+    logger.info(paste("Your remaining data set has", length(data), "locations of", length(namesIndiv(data)),"individuals."))
   }
 
   #tried to include recurse package here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
@@ -59,14 +59,31 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     memb <- cutree(clu,h=2*rad) #group membership for each location
   }
 
-  data@data <- cbind(data@data,"clusterID"=memb)
+  memb <- as.character(memb) #changed to character for splitting possibility
   cluID_all <- unique(memb)
+  data@data <- cbind(data@data,"clusterID"=memb)
   
+  # split clusters with gaps larger than "maxgap" (multi-individual tracks in cluster) - NEED TO TEST!!!
+  for (i in seq(along=cluID_all)) #for loop ok?
+  {
+    x <- cluID_all[i]
+    datax <- data[data@data$clusterID==x]
+    gapix <- which(difftime(timestamps(datax)[-1],timestamps(datax)[-length(datax)],unit=gap_unit)>maxgap)
+    if (length(gapix)>0)
+    {
+      ends <- c(gapix,length(datax))
+      for (i in rev(seq(along=gapix))) data@data$clusterID[data@data$clusterID==x][(ends[i]+1):ends[i+1]] <- paste0(x,".",i) #keeps orig. name for first component
+    }
+  }
+  
+  cluID_all <- unique(data@data$clusterID) #feed new clusters into list of all
+
+  #remove clusters with duration below "dur"
   cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(as.numeric(difftime(max(timestamps(data)[data@data$clusterID==x]),min(timestamps(data)[data@data$clusterID==x]),unit=dur_unit))>=dur, x, NA))
   
   cluID <- cluID[!is.na(cluID)]
   
-  if (length(cluID)>0)
+  if (length(cluID)>0) #include here to calc. number of locations/bursts not in cluster TODO!
   {
     #midlon <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,1])) 
     #midlat <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,2])) 
@@ -75,7 +92,6 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     
     centrlon <- centrloc[,1]
     centrlat <- centrloc[,2]
-    
     
     #take out clusters in rad radius around "remove"
     if (remo==TRUE) 
@@ -117,12 +133,16 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     id.names <- apply(matrix(cluID), 1, function(x) paste(unique(result.df$trackId[result.df$clusterID==x]),collapse=", "))
     id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result.df$tag.local.identifier[result.df$clusterID==x]),collapse=", "))
     
-    id.locs <- id.durs <- character(length(cluID))
+    alldata.df <- as.data.frame(data)
+    
+    id.locs <- id.durs <- id.locsout <- id.locsBETout <- character(length(cluID))
     for (i in seq(along=cluID))
     {
       idsi <- as.character(unique(result.df$trackId[result.df$clusterID==cluID[i]]))
       id.locs[i] <- paste(apply(matrix(idsi), 1, function(x) length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ")
       id.durs[i] <- paste(apply(matrix(idsi), 1, function(x) round(as.numeric(difftime(max(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),min(result.df$timestamp[result.df$trackId==x & result.df$clusterID==cluID[i]],na.rm=TRUE),units=dur_unit)),1)),collapse=", ")
+      id.locsout[i] <- paste(apply(matrix(idsi), 1, function(x) length(which(alldata.df$timestamp[alldata.df$trackId==x] >= min(timestamps(data[data@data$clusterID==cluID[i]])) & alldata.df$timestamp[alldata.df$trackId==x] <= max(timestamps(data[data@data$clusterID==cluID[i]])))) - length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ") #locations outside of cluster in complete cluster interval
+      id.locsBETout[i] <- paste(apply(matrix(idsi), 1, function(x) length(which(alldata.df$timestamp[alldata.df$trackId==x] >= min(alldata.df$timestamp[alldata.df$clusterID==cluID[i] & alldata.df$trackId==x]) & alldata.df$timestamp[alldata.df$trackId==x] <= max(alldata.df$timestamp[alldata.df$clusterID==cluID[i] & alldata.df$trackId==x]))) - length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ") #locations outside of cluster in indiv specific cluster interval
     }
     timestamp.start <- apply(matrix(cluID), 1, function(x) paste(as.character(min(timestamps(result[result@data$clusterID==x]))),"UTC"))
     timestamp.end <- apply(matrix(cluID), 1, function(x) paste(as.character(max(timestamps(result[result@data$clusterID==x]))),"UTC"))
@@ -135,7 +155,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...
     timestamp.start.local <- apply(data.frame(timestamp.start,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     timestamp.end.local <- apply(data.frame(timestamp.end,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     
-    clu_tab <- data.frame("cluster.ID"=cluID,n.locs,n.ids,id.tags,id.locs,id.durs,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,timestamp.start,timestamp.end,id.names,cluster.diameter.m,realised.centr.radius.m)
+    clu_tab <- data.frame("cluster.ID"=cluID,n.locs,n.ids,id.tags,id.locs,id.durs,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,timestamp.start,timestamp.end,id.names,cluster.diameter.m,realised.centr.radius.m,id.locsout,id.locsBETout)
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
     
