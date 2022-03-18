@@ -6,7 +6,7 @@ library('sf')
 library('sp')
 library('rgeos')
 
-rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", data, ...) {
+rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1, gap_unit="days", data, ...) {
   Sys.setenv(tz="UTC")
   names(data) <- make.names(names(data),allow_=FALSE)
   
