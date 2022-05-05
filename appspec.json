@@ -56,14 +56,14 @@
 	{
       "id": "maxgap",
       "name": "Maximim gap duration between locations in a cluster",
-      "description": "Provide the maximum time gap that you allow between locations in a cluster (indep. of individual). Clusters will be split if there are larger gaps. Defaults to 1 (day).",
+      "description": "Provide the maximum time gap that you allow between locations in a cluster (indep. of individual). Clusters will be split if there are larger gaps. See unit below. Defaults to 1 (day).",
       "defaultValue": 1,
       "type": "DOUBLE"
     },
 	{
       "id": "gap_unit",
       "name": "Gap duration unit",
-      "description": "Select the unit for your gap time variable.",
+      "description": "Select the unit for your gap duration time variable.",
       "defaultValue": "days",
       "type": "DROPDOWN",
       "options": [
@@ -114,6 +114,7 @@
     "cluster",
     "point cluster",
     "cluster use",
+	"cluster revisitation",
 	"animal movement"
   ],
   "people": [

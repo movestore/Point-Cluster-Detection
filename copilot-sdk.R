@@ -2,7 +2,8 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "App-Output African_Vultures__Cloud_Storage__2022-01-28_09-35-06.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output_ WCS_and_NCZ_data__Segment_Data_by_Speed__2022-04-03_02-37-03_largeData_ERROR.rds" #important to set to NULL for movebank-download
+# try to split this data set by year or else... try what is the max amount of data for the App
 outputFileName = "output.rds"
 
 args <- list()
@@ -31,7 +32,7 @@ inputData <- NULL
 if(!is.null(inputFileName) && inputFileName != "" && file.exists(inputFileName)) {
   cat("Loading file from", inputFileName, "\n")
   inputData <- readRDS(file = inputFileName)
-} else {
+  } else {
   cat("Skip loading: no input File", "\n")
 }
 

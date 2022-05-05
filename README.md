@@ -16,6 +16,8 @@ For hierarchical clustering the `average` method is used, i.e. the clusters are 
 
 If one has uploaded a file of locations with individual.local.identifier="remove" in a preceding App, this App will automatically exclude those locations from the analysis and after the clustering exclude those clusters that have centre points less than `rad` metre from the locations of "remove". That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
 
+According to the maxgap parameter, clusters with usage gaps larger than the defined value are split.
+
 A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster.
 
 The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement). This dataset is also returned as a .csv artefact to download, including local timestamps.
@@ -60,20 +62,27 @@ n.ids:					number of different individuals using the cluster
 
 id.names:				animalIDs of all indiviuals using the cluster (comma separated)
 
-id.tags:					tagIDs of the tags of all individuals using the cluster (comma separated)
+id.tags:				tagIDs of the tags of all individuals using the cluster (comma separated)
 
-id.locs:					number of locations of each individual in the cluster (comma separated, same order as id.names)
+id.locs:				number of locations of each individual in the cluster (comma separated, same order as id.names)
 
-id.durs (hours):			time duration between first and last location in cluster of each individual (unit=hours, same order as id.names, zero if only one location of the individual in the cluster)
+id.durs (hours):		time duration between first and last location in cluster of each individual (unit=hours, same order as id.names, zero if only one location of the individual in the cluster)
 
 cluster.diameter.m:		maximum pairwise distance between all locations of the cluster (unit=metres)
 
 realised.centr.radius.m:	realised cluster radius towards most central position, i.e. maximum distance of cluster locations to most central position in cluster (see above, unit=metres)
 
-id.locsout: number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by any individual (i.e. can be edgle locations before/after the respective individual has started/ended using the cluster
+id.locsout: 			number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by any individual (i.e. can be edgle locations before/after the respective individual has started/ended using the cluster
 
-id.locsBETout: number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by that specific individual (i.e. between the first and last visit of the indiviual to that cluster)
+id.locsBETout: 			number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by that specific individual (i.e. between the first and last visit of the indiviual to that cluster)
 
+n.revs: 				number of revisits of cluster (i.e. number of times individuals leave cluster and come back, summed over all individuals that use the cluster
+
+id.nrevs: 				individual number of revisits (i.e. number of time an individual leaves the cluster and comes back). Comma separated by individual, see id.names/id.tags for order
+
+id.durBETrevs: 			duration of time outside of cluster for each leave/revisit event. Comma separated by individual (with space) and revisit event (without space). See id.names/id.tags for order
+
+id.maxdistBETrevs: 		maximum distance from cluster centre location during each leave/revisit event. Comma separated by individual (with space) and revisit event (without space). See id.names/id.tags for order
 
 #### `Points_With_Clusters.csv`
 
@@ -107,6 +116,8 @@ n.ids:				number of individuals using the cluster to which this location belongs
 
 n.locs:				number of locations forming the cluster to which this location belongs
 
+n.revs: 			number of revisits of cluster (i.e. number of times individuals leave cluster and come back, summed over all individuals that use the cluster
+
 
 ### Parameters 
 `meth`: Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
@@ -117,7 +128,7 @@ n.locs:				number of locations forming the cluster to which this location belong
 
 `dur_unit`: Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
 
-`maxgap`: Maximum tolerated gap duration between successive locations in a cluster. Individuals to who the loations belong are irrelevant. Clusters are split at gaps exceeding this maximum gap duration. Unit below. Default 1.
+`maxgap`: Maximum tolerated usage gap duration between successive locations in a cluster. Individuals to who the loations belong are irrelevant. Clusters are split at gaps exceeding this maximum gap duration. Unit below. Default 1.
 
 `gap_unit`: Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
 
