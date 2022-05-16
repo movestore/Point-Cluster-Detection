@@ -148,7 +148,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     alldata.df <- as.data.frame(data)
     
     id.locs <- id.durs <- id.locsout <- id.locsBETout <- id.nrevs <- id.durBETrevs <- id.maxdistBETrevs <- character(length(cluID))
-    n.revs <- numeric(length(cluID))
+    n.revs <- n.locsout <- numeric(length(cluID))
     for (i in seq(along=cluID))
     {
       idsi <- as.character(unique(result.df$trackId[result.df$clusterID==cluID[i]])) #individuals that use this cluster
@@ -158,6 +158,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
       
       id.locsout[i] <- paste(apply(matrix(idsi), 1, function(x) length(which(alldata.df$timestamp[alldata.df$trackId==x] >= min(timestamps(data[data@data$clusterID==cluID[i]])) & alldata.df$timestamp[alldata.df$trackId==x] <= max(timestamps(data[data@data$clusterID==cluID[i]])))) - length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ") #locations outside of cluster in complete cluster interval
       id.locsBETout[i] <- paste(apply(matrix(idsi), 1, function(x) length(which(alldata.df$timestamp[alldata.df$trackId==x] >= min(alldata.df$timestamp[alldata.df$clusterID==cluID[i] & alldata.df$trackId==x]) & alldata.df$timestamp[alldata.df$trackId==x] <= max(alldata.df$timestamp[alldata.df$clusterID==cluID[i] & alldata.df$trackId==x]))) - length(result.df$trackId[result.df$trackId==x & result.df$clusterID==cluID[i]])),collapse=", ") #locations outside of cluster in indiv specific cluster interval
+      n.locsout[i] <- sum(as.numeric(trimws(strsplit(as.character(id.locsout[i]),",")[[1]])),na.rm=TRUE) # sum of all locations outside of cluster (all idvs. that use cluster, complete cluster duration)
       
       id.nrevisits <- id.durBETrevisits <- id.maxdistBETrevisits <- character(0)
       for (j in seq(along=idsi))
@@ -200,7 +201,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     timestamp.start.local <- apply(data.frame(timestamp.start,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     timestamp.end.local <- apply(data.frame(timestamp.end,tz_info_clu), 1, function(x) as.character(lubridate::with_tz(x[1], x[2])))
     
-    clu_tab <- data.frame("cluster.ID"=cluID,n.locs,n.ids,id.tags,id.locs,id.durs,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,timestamp.start,timestamp.end,id.names,cluster.diameter.m,realised.centr.radius.m,id.locsout,id.locsBETout,n.revs,id.nrevs,id.durBETrevs,id.maxdistBETrevs)
+    clu_tab <- data.frame("cluster.ID"=cluID,n.locs,n.ids,id.tags,id.locs,id.durs,"centr.long"=centrlon,"centr.lat"=centrlat,timestamp.start.local,timestamp.end.local,"local.timezone"=tz_info_clu,duration,timestamp.start,timestamp.end,id.names,cluster.diameter.m,realised.centr.radius.m,n.locsout,id.locsout,id.locsBETout,n.revs,id.nrevs,id.durBETrevs,id.maxdistBETrevs)
     
     names(clu_tab)[names(clu_tab)=="duration"] <- paste0("duration (",dur_unit,")")
     names(clu_tab)[names(clu_tab)=="id.durs"] <- paste0("id.durs (",dur_unit,")")
@@ -211,14 +212,15 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     write.csv(clu_tab,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Cluster_Table.csv"),row.names=FALSE)
     #write.csv(clu_tab,file="Cluster_Table.csv",row.names=FALSE)
     
-    # finish points with clusters table, add n.ids and n.locs for Email Alert App
+    # finish points with clusters table, add n.ids and n.locs for Email Alert App (and n.revs and n.locsout for Earth Ranger)
     result@data$n.ids <- apply(matrix(result@data$clusterID), 1, function(x) n.ids[which(cluID==x)])
     result@data$n.locs <- apply(matrix(result@data$clusterID), 1, function(x) n.locs[which(cluID==x)])
     result@data$n.revs <- apply(matrix(result@data$clusterID), 1, function(x) n.revs[which(cluID==x)])
-    result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs,"n.revs"=result@data$n.revs)
+    result@data$n.locsout <- apply(matrix(result@data$clusterID), 1, function(x) n.locsout[which(cluID==x)])
+    result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs,"n.locsout"=result@data$n.locsout,"n.revs"=result@data$n.revs)
     
-    ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
-    result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]]
+    ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
+    result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]]
     
     names(result.df.csv)[names(result.df.csv)=="trackId"] <- c("animalID")
     names(result.df.csv)[names(result.df.csv)=="tag.local.identifier"] <- c("tagID")
@@ -230,7 +232,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
-    selnames <- c("clusterID","tagID","n.ids","n.locs","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]
+    selnames <- c("clusterID","tagID","n.ids","n.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]
     result@data <- data.frame(result@data,coo)
     sel <- which(names(result@data) %in% selnames)
     result@data <- data.frame(result@data[,selnames],result@data[-sel])

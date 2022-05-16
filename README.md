@@ -18,9 +18,9 @@ If one has uploaded a file of locations with individual.local.identifier="remove
 
 According to the maxgap parameter, clusters with usage gaps larger than the defined value are split.
 
-A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster.
+A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster. See definition of all parameters in the list(s) below.
 
-The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement). This dataset is also returned as a .csv artefact to download, including local timestamps.
+The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement), including the clusterID, number of animals using the cluster, number of locations in and outside the cluster (in the time that the cluster was used and by the individuals that used the clsuter) and number of revisits. This dataset is also returned as a .csv artefact to download, including local timestamps.
 
 ### Input data
 moveStack in Movebank format
@@ -72,6 +72,8 @@ cluster.diameter.m:		maximum pairwise distance between all locations of the clus
 
 realised.centr.radius.m:	realised cluster radius towards most central position, i.e. maximum distance of cluster locations to most central position in cluster (see above, unit=metres)
 
+n.locsout:				sum of locations outside of the cluster of all individuals that used the cluster in the time interval that the cluster was used. This can be used to calculate fertility of the cluster (fertility = n.locs - n.locsout)
+
 id.locsout: 			number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by any individual (i.e. can be edgle locations before/after the respective individual has started/ended using the cluster
 
 id.locsBETout: 			number of locations of each individual (see names/tags in id.names/tags) that are outside of the cluster in the time interval that the cluster is used by that specific individual (i.e. between the first and last visit of the indiviual to that cluster)
@@ -115,6 +117,8 @@ clu.centr.lat:		latitutde of most central position in cluster to which this loca
 n.ids:				number of individuals using the cluster to which this location belongs
 
 n.locs:				number of locations forming the cluster to which this location belongs
+
+n.locsout:			number of locations outside the cluster to which this location belongs (restricted to full duration of cluser use and animals that used the cluster)
 
 n.revs: 			number of revisits of cluster (i.e. number of times individuals leave cluster and come back, summed over all individuals that use the cluster
 
