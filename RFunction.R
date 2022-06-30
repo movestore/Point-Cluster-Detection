@@ -74,17 +74,26 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
   cluID_all <- unique(memb)
   data@data <- cbind(data@data,"clusterID"=memb)
   
-  # split clusters with gaps larger than "maxgap" (multi-individual tracks in cluster)
+  # split clusters with gaps larger than "maxgap" (multi-individual tracks in cluster), but careful: the timestamps were not ordered if there are more than 1 idv - now adapted!
   for (i in seq(along=cluID_all))
   {
     #print(i)
     xx <- cluID_all[i]
-    datax <- data[data@data$clusterID==xx]
-    gapix <- which(difftime(timestamps(datax)[-1],timestamps(datax)[-length(datax)],unit=gap_unit)>maxgap)
-    if (length(gapix)>0)
+    ixx <- which(data@data$clusterID==xx)
+    datax <- data[ixx]
+    
+    o <- order(timestamps(datax))
+    ixo <- ixx[o]
+    gapixo <- which(difftime((timestamps(datax)[o])[-1],(timestamps(datax)[o])[-length(datax)],unit=gap_unit)>maxgap)
+    #gapix <- which(difftime(timestamps(datax)[-1],timestamps(datax)[-length(datax)],unit=gap_unit)>maxgap) #did not combine timestamps of multiple IDs
+    if (length(gapixo)>0)
     {
-      ends <- c(gapix,length(datax))
-      for (i in rev(seq(along=gapix))) data@data$clusterID[data@data$clusterID==xx][(ends[i]+1):ends[i+1]] <- paste0(xx,".",i) #keeps orig. name for first component
+      endso <- c(gapixo,length(datax))
+      for (j in seq(along=gapixo)) 
+      {
+        ixo_endsoj <- ixo[(endso[j]+1):endso[j+1]]
+        data@data$clusterID[ixo_endsoj] <- paste0(xx,".",j) #keeps orig. name for first component
+      }
     }
   }
   
@@ -95,7 +104,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
   
   cluID <- cluID[!is.na(cluID)]
   
-  if (length(cluID)>0) #include here to calc. number of locations/bursts not in cluster TODO!
+  if (length(cluID)>0) #include here to calc. number of locations/bursts not in cluster - see below
   {
     #midlon <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,1])) 
     #midlat <- apply(matrix(cluID), 1, function(x) mean(coordinates(data[data@data$clusterID==x])[,2])) 
