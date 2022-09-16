@@ -38,6 +38,10 @@
       "defaultValue": "days",
       "type": "DROPDOWN",
       "options": [
+		{
+          "value": "mins",
+          "displayText": "minute(s)"
+        },
         {
           "value": "hours",
           "displayText": "hour(s)"
@@ -67,6 +71,10 @@
       "defaultValue": "days",
       "type": "DROPDOWN",
       "options": [
+		{
+          "value": "mins",
+          "displayText": "minute(s)"
+        },
         {
           "value": "hours",
           "displayText": "hour(s)"

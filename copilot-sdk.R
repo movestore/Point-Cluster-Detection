@@ -2,7 +2,7 @@ library(jsonlite)
 source("logger.R")
 source("RFunction.R")
 
-inputFileName = "App-Output_ WCS_and_NCZ_data__Segment_Data_by_Speed__2022-04-03_02-37-03_largeData_ERROR.rds" #important to set to NULL for movebank-download
+inputFileName = "App-Output_ Cluster_Analysis_Vultures__Cloud_Storage__2022-07-05_06-03-55.rds" #important to set to NULL for movebank-download
 # try to split this data set by year or else... try what is the max amount of data for the App
 outputFileName = "output.rds"
 
@@ -20,10 +20,10 @@ args <- list()
 # Add your arguments of your r function here
 args[["meth"]] = "buff" #"buff", "hclust"
 args[["rad"]] = 200 #m - double
-args[["dur"]] = 1 #days - double
-args[["dur_unit"]] = "hours" #"hours","weeks"
-args[["maxgap"]] = 24 #
-args[["gap_unit"]] = "hours" #"hours","days","weeks"
+args[["dur"]] = 24 #days - double
+args[["dur_unit"]] = "mins" #"hours","weeks"
+args[["maxgap"]] = 300 #
+args[["gap_unit"]] = "mins" #"hours","days","weeks"
 
 
 #################################################################
