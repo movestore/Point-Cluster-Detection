@@ -18,7 +18,7 @@ If one has uploaded a file of locations with individual.local.identifier="remove
 
 According to the maxgap parameter, clusters with usage gaps larger than the defined value are split.
 
-A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster. See definition of all parameters in the list(s) below.
+A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, cumulative timelag of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster. See definition of all parameters in the list(s) below.
 
 The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement), including the clusterID, number of animals using the cluster, number of locations in and outside the cluster (in the time that the cluster was used and by the individuals that used the clsuter) and number of revisits. This dataset is also returned as a .csv artefact to download, including local timestamps.
 
@@ -57,6 +57,8 @@ local.timezone:			name of local timezone (incl. closest large city)
 duration (hours):		time duration between first and last location in cluster (unit=hours)
 
 n.locs:					number of locations in cluster (independent of individual)
+
+cumlag.locs:			cumulative timelag (duration to next logged location) of all locations in cluster to which this location belongs (unit as `dur_unit`; useful if input data are tracks with different resolutions; warning: data gaps can cause problemes here, always compare with n.locs
 
 n.ids:					number of different individuals using the cluster
 
@@ -117,6 +119,8 @@ clu.centr.lat:		latitutde of most central position in cluster to which this loca
 n.ids:				number of individuals using the cluster to which this location belongs
 
 n.locs:				number of locations forming the cluster to which this location belongs
+
+cumlag.locs:			cumulative timelag (duration to next logged location) of all locations in cluster to which this location belongs (unit as `dur_unit`; useful if input data are tracks with different resolutions; warning: data gaps can cause problemes here, always compare with n.locs
 
 n.locsout:			number of locations outside the cluster to which this location belongs (restricted to full duration of cluser use and animals that used the cluster)
 
