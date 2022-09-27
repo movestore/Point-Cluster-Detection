@@ -52,7 +52,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
       vonbis <- matrix(c(seq(1,length(pts_eq),by=stp),(seq(1,length(pts_eq),by=stp))[-1]-1,length(pts_eq)),nc=2)
       #apply(vonbis, 1, function(x) data_eq_extr[x[1]:x[2],] <- as.data.frame(extract(data_eq_buffer_disag,pts_eq[x[1]:x[2]]))) #does not work
       for (i in seq(along=vonbis[,1])) data_eq_extr[vonbis[i,1]:vonbis[i,2],] <- extract(data_eq_buffer_disag,pts_eq[vonbis[i,1]:vonbis[i,2]])
-    } else data_eq_extr <- extract(data_eq_buffer_disag,pts_eq)
+    } else data_eq_extr[1:length(pts_eq),] <- extract(data_eq_buffer_disag,pts_eq)
 
     #plot(data_eq_buffer_disag,col=rainbow(26))
     #points(SpatialPoints(data_eq),col=data_eq_extr$poly.ID,pch=20,cex=5)
@@ -141,12 +141,13 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     
     coo <- data.frame(coordinates(result))
     names(coo) <- c("location.long","location.lat")
-    result.df <- data.frame(as.data.frame(result),coo)
+    result.df <- data.frame(as.data.frame(result),coo) #NA columns are back in
+    result.df <- result.df[,!sapply(result.df, function(x) all(is.na(x)))] #take NA out
     names(result.df) <- make.names(names(result.df),allow_=FALSE)
     clu.ix <- which(names(result.df) %in% c("clusterID","clu.centr.long","clu.centr.lat"))
     result.df <- data.frame(result.df[,clu.ix],result.df[,-clu.ix])
-    heightix <- min(grep("height",names(result.df)))
-    heightname <- names(result.df)[heightix]
+    heightix <- grep("height",names(result.df))
+    if(length(heightix)>0) heightname <- names(result.df)[min(heightix)] else heightname <- NA
     
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result@data$clusterID==x)))
@@ -234,8 +235,15 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     result@data$n.locsout <- apply(matrix(result@data$clusterID), 1, function(x) n.locsout[which(cluID==x)])
     result.df <- cbind(result.df,"n.ids"=result@data$n.ids,"n.locs"=result@data$n.locs,"cumlag.locs"=result@data$cumlag.locs,"n.locsout"=result@data$n.locsout,"n.revs"=result@data$n.revs)
     
-    ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
+    if (!is.na(heightname))
+    {
+      ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
     result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]]
+    } else
+    {
+      ixcsv <- which(c("clusterID","tag.local.identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading","clu.centr.long","clu.centr.lat") %in% names(result.df)) #fix if e.g. some data sets done have ground.speed or heading
+      result.df.csv <- result.df[,c("clusterID","tag.local.identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","trackId","ground.speed","heading","clu.centr.long","clu.centr.lat")[ixcsv]]
+    }
     
     names(result.df.csv)[names(result.df.csv)=="trackId"] <- c("animalID")
     names(result.df.csv)[names(result.df.csv)=="tag.local.identifier"] <- c("tagID")
@@ -247,7 +255,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     write.csv(result.df.csv,file=paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Points_With_Clusters.csv"),row.names=FALSE)
     #write.csv(result.df.csv,file="Points_With_Clusters.csv",row.names=FALSE) 
     
-    selnames <- c("clusterID","tagID","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv]
+    if (!is.na(heightname)) selnames <- c("clusterID","tagID","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading",heightname,"clu.centr.long","clu.centr.lat")[ixcsv] else selnames <- c("clusterID","tagID","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","animalID","ground.speed","heading","clu.centr.long","clu.centr.lat")[ixcsv]
     result@data <- data.frame(result@data,coo)
     sel <- which(names(result@data) %in% selnames)
     result@data <- data.frame(result@data[,selnames],result@data[-sel])
