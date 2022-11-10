@@ -9,6 +9,7 @@ library('rgeos')
 rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1, gap_unit="days", data, ...) {
   Sys.setenv(tz="UTC")
   names(data) <- make.names(names(data),allow_=FALSE)
+  data@data$timestamp <- timestamps(data)
   
   if (is.null(rad))
   {
