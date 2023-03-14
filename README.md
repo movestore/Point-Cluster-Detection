@@ -1,4 +1,4 @@
-# Point Cluster Detection
+# Multiple Animal Cluster Detection
 
 MoveApps
 
@@ -127,30 +127,30 @@ n.locsout:			number of locations outside the cluster to which this location belo
 n.revs: 			number of revisits of cluster (i.e. number of times individuals leave cluster and come back, summed over all individuals that use the cluster
 
 
-### Parameters 
-`meth`: Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
+### Settings 
+**Cluster Method (`meth`):** Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
 
-`rad`: Radius within which locations have to lie to be defined as a cluster. Unit = metre. Default 200 m.
+**Cluster radius (`rad`):** Radius within which locations have to lie to be defined as a cluster. Unit = metre. Default 200 m.
 
-`dur`: Duration that a cluster has to be repeatadly visited. Unit below. Default 14.
+**Minimum duration at a cluster (`dur`):** Duration that a cluster has to be repeatadly visited. Unit below. Default 14.
 
-`dur_unit`: Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
+**Time duration unit (`dur_unit`):** Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
 
-`maxgap`: Maximum tolerated usage gap duration between successive locations in a cluster. Individuals to who the loations belong are irrelevant. Clusters are split at gaps exceeding this maximum gap duration. Unit below. Default 1.
+**Maximim gap duration between locations in a cluster (`maxgap`):** Maximum tolerated usage gap duration between successive locations in a cluster. Individuals to who the loations belong are irrelevant. Clusters are split at gaps exceeding this maximum gap duration. Unit below. Default 1.
 
-`gap_unit`: Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
+**Gap duration unit (`gap_unit`):** Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
 
 ### Null or error handling:
-**Parameter `meth`:** Default `buff` allows no NULL.
+**Setting `meth`:** Default `buff` allows no NULL.
 
-**Parameter `rad`:** Radius NULL defaults to 200 m. Too small radii might lead to small clusters, please include location inaccuracies here.
+**Setting `rad`:** Radius NULL defaults to 200 m. Too small radii might lead to small clusters, please include location inaccuracies here.
 
-**Parameter `dur`:** Duration NULL defaults to 14 (days). Too large durations might lead to few clusters.
+**Setting `dur`:** Duration NULL defaults to 14 (days). Too large durations might lead to few clusters.
 
-**Parameter `dur_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
+**Setting `dur_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
 
-**Parameter `maxgap`:** Duration NULL defaults to 1 (day). Too small maximum gaps might lead to fewer and smaller clusters.
+**Setting `maxgap`:** Duration NULL defaults to 1 (day). Too small maximum gaps might lead to fewer and smaller clusters.
 
-**Parameter `gap_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
+**Setting `gap_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
 
 **Data:** All locations that are in a (any) cluster are returned to the next App. If no clusters are found in your data set NULL is returned, likel with an error.
