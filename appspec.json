@@ -56,7 +56,6 @@
         }
       ]
     },
-,
 	{
       "id": "maxgap",
       "name": "Maximim gap duration between locations in a cluster",
@@ -88,16 +87,45 @@
           "displayText": "week(s)"
         }
       ]
-    }		
+    },
+	{
+      "id": "clu_transm",
+      "name": "Cluster Transmission Mode",
+      "description": "Select if you want to pass on to the next App all found clusters or only those new ones that could not be detected with excluding the last Y hours of data (please define Y below). This setting is crucial to keep latency of data transmission to e.g. EarthRanger minimal.",
+      "defaultValue": "all",
+      "type": "RADIOBUTTONS",
+      "options": [
+		{
+          "value": "all",
+          "displayText": "Pass on all clusters."
+        },
+		{
+          "value": "new",
+          "displayText": "Pass on only new clusters."
+        }
+      ]
+    },
+	{
+      "id": "new_dur",
+      "name": "Y - number of hours representing 'new'",
+      "description": "Provide the number Y of hours that define 'new' clusters. This value will be used for 'Cluster Transmission Mode'. If one wants to pass on only new clusters, those that are also detected without the latest Y hours of data are excluded. Defaults to 24 (hours).",
+      "defaultValue": 24,
+      "type": "DOUBLE"
+    },
+	{
+      "id": "remo_sites",
+      "name": "Locations of nests, roost or other sites to remove.",
+      "description": "You can upload a comma separated(li file called 'remove.csv'(!) with locations of nest sites, roosts or other known sites that you do not want to consider as cluster sites. They will be removed from the results. Note that the provided locations must be formatted as longitute/latitute in WGS84 projection, in decimal degrees and listed in two columns with headers called 'longitude' and 'latitude'. If no file is provided, then all clusters will be extracted.",
+      "type": "LOCAL_FILE"
+    }
   ],
   "dependencies": {
     "R": [
       {
-        "name": "lubridate",
-		"version": "1.7.10"
+        "name": "lubridate"
       },
 	  {
-        "name": "move"
+        "name": "move2"
       },
       {
         "name": "geodist"
@@ -109,11 +137,10 @@
         "name": "sf"
       },
 	  {
-        "name": "rgeos"
+        "name": "terra"
       }
     ]
   },
-  "createsArtifacts": true,
   "license": {
     "key": "MIT"
   },
@@ -121,6 +148,7 @@
   "keywords": [
     "cluster",
     "point cluster",
+	"multiple animal cluser",
     "cluster use",
 	"cluster revisitation",
 	"animal movement"

@@ -5,7 +5,7 @@ MoveApps
 Github repository: *github.com/movestore/Point-Cluster_Detection*
 
 ## Description
-Detection of point clusters, where possibly more than one animal returns to within a specified time interval. Provides a table of each cluster with the times, duration, number of locations and animals. Clusters close to locations of ID "remove" can be excluded.
+Detection of point clusters, where possibly more than one animal returns to within a specified time interval. Provides a table of each cluster with the times, duration, number of locations and animals. Clusters close to locations provided in a file 'remove.csv' can be excluded. By setting, only 'new' clusters can be transmitted.
 
 ## Documentation
 This App uses two types of clustering (buffer overlap or hierarchical clustering) for the detection of point clusters where one or more animals return to repeatedly within a specified time frame. 
@@ -14,19 +14,21 @@ For buffer clustering all locations are transformed into a circular spatial poly
 
 For hierarchical clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
 
-If one has uploaded a file of locations with individual.local.identifier="remove" in a preceding App, this App will automatically exclude those locations from the analysis and after the clustering exclude those clusters that have centre points less than `rad` metre from the locations of "remove". That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
+If one has uploaded a local file called 'remove.csv' of locations (column names must be `longitute` and `latitude`!), this App will automatically exclude those clusters that have centre points less than `rad` metre from the locations of 'remove.csv'. That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
 
 According to the maxgap parameter, clusters with usage gaps larger than the defined value are split.
 
-A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, cumulative timelag of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster. See definition of all parameters in the list(s) below.
+A cluster overview table is returned as a .csv artefact to download. It includes for each cluster the most central location (minimum distance to all other locations), the most used location (if rounded to 4 decimals (+/-11m) which location is most used; note: if there are several candidates, then the one closest to the central location), timestamps of first and last location (UTC and local time), duration, cluster diameter, realised cluster radius (related to most central location), number of locations, cumulative timelag of locations, number of animals, the names of those animals, their tag numbers and their respective duration and number of locations in the cluster. See definition of all parameters in the list(s) below.
 
 The output of the App includes the locations that could be attributed to a cluster (that fulfilled the minimum duration requirement), including the clusterID, number of animals using the cluster, number of locations in and outside the cluster (in the time that the cluster was used and by the individuals that used the clsuter) and number of revisits. This dataset is also returned as a .csv artefact to download, including local timestamps.
 
+If selected, only 'new' clusters can be returned. 'New' means, that those clusters were not found if excluding all locations from the last Y hours (in relation to time or App run). Those clusters from the complete cluster set, which were completely embedded in one cluster of the 'old' data set are not returned. This setting is most useful for regular, scheduled runs of this App and integration into EarthRanger, so as to minimise data traffic.
+
 ### Input data
-moveStack in Movebank format
+move2 location object
 
 ### Output data
-moveStack in Movebank format
+move2 location object
 
 
 ### Products (Artefacts)
@@ -43,14 +45,18 @@ clusterID:				ID of cluster
 centr.long:				longitude of most central positon in cluster (minimum average distance to all other locations)
 
 centr.lat:				latitutde of most central position in cluster (minimum average distance to all other locations)
+	
+maxuse.long:			longitude of maximum used positon in cluster (most locations if rounded to 4 decimals)
 
-timestamp.start:			time of first location in cluster (UTC, format=YYYY-MM-DD HH:MM:SS)
+maxuse.lat:				latitutde of maximum used position in cluster (most locations if rounded to 4 decimals)
+
+timestamp.start:		time of first location in cluster (UTC, format=YYYY-MM-DD HH:MM:SS)
 
 timestamp.end:			time of last location in cluster (UTC, format=YYYY-MM-DD HH:MM:SS)
 
 timestamp.start.local:	local timestamp of first location in cluster (format=YYYY-MM-DD HH:MM:SS)
 
-timestamp.end.local:		local timestamp of last location in cluster (format=YYYY-MM-DD HH:MM:SS)
+timestamp.end.local:	local timestamp of last location in cluster (format=YYYY-MM-DD HH:MM:SS)
 
 local.timezone:			name of local timezone (incl. closest large city)
 
@@ -116,6 +122,10 @@ clu.centr.long:		longitude of most central positon in cluster  to which this loc
 
 clu.centr.lat:		latitutde of most central position in cluster to which this location belongs
 
+clu.maxuse.long:	longitude of maximum used positon in cluster to which this location belongs
+
+clu.maxuse.lat:		latitutde of maximum used position in cluster to which this location belongs
+
 n.ids:				number of individuals using the cluster to which this location belongs
 
 n.locs:				number of locations forming the cluster to which this location belongs
@@ -140,6 +150,15 @@ n.revs: 			number of revisits of cluster (i.e. number of times individuals leave
 
 **Gap duration unit (`gap_unit`):** Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
 
+**Cluster Transmission Mode (`clu_transm`):** Setting to allow only returning 'new' clusters that were not detected with the data set excluding the previous Y hours. Defaults to returning all clusters.
+
+**Y - number of hours representing 'new' (`new_dur`):** Number of hours that data set shall be compared with to extract only 'new' clusters. Defaults to 24 (h).
+
+**Locations of nests, roost or other sites to remove. (`remo_sites`):** A csv-file with locations, close to which clusters shall be excluded. Defaults to no file.
+
+### Most common errors
+Please post an issues [here](https://github.com/movestore/Point-Cluster-Detection/issues) if you encounter recurring errors or problems.
+
 ### Null or error handling:
 **Setting `meth`:** Default `buff` allows no NULL.
 
@@ -152,5 +171,7 @@ n.revs: 			number of revisits of cluster (i.e. number of times individuals leave
 **Setting `maxgap`:** Duration NULL defaults to 1 (day). Too small maximum gaps might lead to fewer and smaller clusters.
 
 **Setting `gap_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
+
+**Setting `new_dur`:** If this number is too small, most clusters will be removed.
 
 **Data:** All locations that are in a (any) cluster are returned to the next App. If no clusters are found in your data set NULL is returned, likel with an error.
