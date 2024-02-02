@@ -1,10 +1,10 @@
 {
     "meth": "hclust",
     "rad": 200,
-    "dur": 12,
+    "dur": 1,
     "dur_unit": "hours",
     "maxgap": 1,
     "gap_unit": "days",
-    "clu_transm": "new",
+    "clu_transm": "all",
     "new_dur": 96
 }

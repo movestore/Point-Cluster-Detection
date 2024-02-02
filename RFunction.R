@@ -185,25 +185,25 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     
     # load remove locations file and take out clusters in rad radius around them
     #remo_file_path <- "./data/local_app_files/uploaded-app-files/" 
-    remo_file_path <- getAppFilePath("remo_sites") #ask Clemens!
+    remo_file_path <- getAppFilePath("remo_sites") #ask Clemens -this does not work without fallback???
     if ("remove.csv" %in% list.files(remo_file_path))
     {
-      remo <- read.csv(paste0(remo_file_path,"remove.csv"),header=TRUE)
-      if ("latitude" %in% names(remo) & "longitude" %in% names(remo))
-      {
-        logger.info(paste("You have uploaded a file with",length(remo$latitude),"locations to remove from the set of clusters."))
-        remo_dist <-  geodist_vec(x1=remo$longitude,y1=remo$latitude,x2=centrlon,y2=centrlat,measure="vincenty")
-        if (any(remo_dist<rad))
-        {
-          out <- which(remo_dist<rad,arr.ind=TRUE)[,2]
-          cluID <- cluID[-out]
-          centrlon <- centrlon[-out]
-          centrlat <- centrlat[-out]
-          maxuselon <- maxuselon[-out]
-          maxuselat <- maxuselat[-out]
-          logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< ",rad," m) to the provided remove locations'."))
-        } else logger.info("None of your provided remove locations were close to a cluster.")
-      } else logger.info ("Your remove.csv file does not include the required columns longitude and latitude. Your required remove locations cannot be taken into account.")
+     remo <- read.csv(paste0(remo_file_path,"remove.csv"),header=TRUE)
+     if ("latitude" %in% names(remo) & "longitude" %in% names(remo))
+     {
+       logger.info(paste("You have uploaded a file with",length(remo$latitude),"locations to remove from the set of clusters."))
+       remo_dist <-  geodist_vec(x1=remo$longitude,y1=remo$latitude,x2=centrlon,y2=centrlat,measure="vincenty")
+       if (any(remo_dist<rad))
+       {
+         out <- which(remo_dist<rad,arr.ind=TRUE)[,2]
+         cluID <- cluID[-out]
+         centrlon <- centrlon[-out]
+         centrlat <- centrlat[-out]
+         maxuselon <- maxuselon[-out]
+         maxuselat <- maxuselat[-out]
+         logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< ",rad," m) to the provided remove locations'."))
+       } else logger.info("None of your provided remove locations were close to a cluster.")
+     } else logger.info ("Your remove.csv file does not include the required columns longitude and latitude. Your required remove locations cannot be taken into account.")
     }
     
     result <- data[data$clusterID %in% cluID,] #these are all locations that are in any (non-remove) cluster with difftime>dur
