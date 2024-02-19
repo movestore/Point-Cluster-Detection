@@ -116,10 +116,8 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
   
   cluID_all <- unique(data$clusterID) #feed new clusters into list of all
   
-  #remove clusters with duration below "dur"
-  cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(as.numeric(difftime(max(mt_time(data)[data$clusterID==x]),min(mt_time(data)[data$clusterID==x]),unit=dur_unit))>=dur, x, NA))
-  #remove clusters which number of locations below "minloc"
-  cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(length(mt_time(data)[data$clusterID==x])>=minloc, x, NA))
+  #remove clusters with duration below "dur" or number of locs within below "minloc" (both conditions must be met for a cluster to be kept!)
+  cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(as.numeric(difftime(max(mt_time(data)[data$clusterID==x]),min(mt_time(data)[data$clusterID==x]),unit=dur_unit))>=dur & length(mt_time(data)[data$clusterID==x])>=minloc, x, NA))
   
   cluID <- cluID[!is.na(cluID)]
   

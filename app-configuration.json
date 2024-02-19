@@ -2,7 +2,7 @@
     "meth": "hclust",
     "rad": 200,
     "dur": 1,
-    "minloc": 7,
+    "minloc": 1,
     "dur_unit": "hours",
     "maxgap": 1,
     "gap_unit": "days",
