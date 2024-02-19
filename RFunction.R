@@ -9,7 +9,7 @@ library('terra')
 # 1. redo all with sf
 # 2. add to output (and csvs): "most common location", i.e. for each cluster cut off at 4 or 5 decimals (round), make table and select location with most occurances (radius 5-10 or 20-30m should be ok) --> rather with extra radius and hclust (clusters within clusters)
 
-rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1, gap_unit="days", clu_transm="all", new_dur=24, data, ...) {
+rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="days", maxgap=1, gap_unit="days", clu_transm="all", new_dur=24, data, ...) {
   Sys.setenv(tz="UTC")
   time_now <- Sys.time()
   if (("timestamp" %in% (names(data)))==FALSE) data$timestamp <- mt_time(data)
@@ -21,8 +21,13 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
   }
   if (is.null(dur))
   {
-    logger.info(paste0("Your minimum cluster duration is not supplied. We use 14 (",dur_unit,")  as default."))
-    dur <- 14
+    logger.info(paste0("Your minimum cluster duration is not supplied. We use 1 (",dur_unit,")  as default."))
+    dur <- 1
+  }
+  if (is.null(minloc))
+  {
+    logger.info(paste0("Your minimum number of locations in a cluster is not supplied. We use 1 as default."))
+    minloc <- 1
   }
 
   #tried to include recurse package here to pre-filter only revisited locations, but the runtime of getRecursions() was too long
@@ -113,6 +118,8 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
   
   #remove clusters with duration below "dur"
   cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(as.numeric(difftime(max(mt_time(data)[data$clusterID==x]),min(mt_time(data)[data$clusterID==x]),unit=dur_unit))>=dur, x, NA))
+  #remove clusters which number of locations below "minloc"
+  cluID <- apply(matrix(cluID_all), 1, function(x) ifelse(length(mt_time(data)[data$clusterID==x])>=minloc, x, NA))
   
   cluID <- cluID[!is.na(cluID)]
   
@@ -231,15 +238,15 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, dur_unit="days", maxgap=1,
     #add tag_local_identifier to results
     if("tag_local_identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag_local_identifier")
     if("tag.local.identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag.local.identifier")
-    
+
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result$clusterID==x)))
     n.ids <- apply(matrix(cluID), 1, function(x) length(unique(mt_track_id(result)[result$clusterID==x])))
     id.names <- apply(matrix(cluID), 1, function(x) paste(unique(mt_track_id(result)[result$clusterID==x]),collapse=", "))
     id.tags <- rep(NA,length(n.ids))
-    if("tag_local_identifier" %in% names(mt_track_data(result))) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(mt_track_data(result[result$clusterID==x,])$tag_local_identifier),collapse=", "))
-    if("tag.local.identifier" %in% names(mt_track_data(result))) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(mt_track_data(result[result$clusterID==x,])$tag.local.identifier),collapse=", "))
-    
+    if("tag_local_identifier" %in% names(result)) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result[result$clusterID==x,]$tag_local_identifier),collapse=", "))
+    if("tag.local.identifier" %in% names(result)) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result[result$clusterID==x,]$tag.local.identifier),collapse=", "))
+
     # add cumlag.locs (sum of timelags of each location in cluster) - addition from Sep 2022
     #result$timelag <- unlist(lapply(timeLag(result, units=dur_unit), function(x) c(as.vector(x), NA)))
     result$timelag <- mt_time_lags(result,units=dur_unit)

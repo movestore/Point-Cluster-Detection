@@ -142,7 +142,9 @@ n.revs: 			number of revisits of cluster (i.e. number of times individuals leave
 
 **Cluster radius (`rad`):** Radius within which locations have to lie to be defined as a cluster. Unit = metre. Default 200 m.
 
-**Minimum duration at a cluster (`dur`):** Duration that a cluster has to be repeatadly visited. Unit below. Default 14.
+**Minimum duration at a cluster (`dur`):** Duration that a cluster has to be repeatadly visited. Unit below. Default 1.
+
+**Minimum number of locations building a cluster (`minloc`):** Minimum number of locations that a cluster needs to be made up of to be included into the results. Default 1.
 
 **Time duration unit (`dur_unit`):** Duration unit for variable `dur`. Can be `hours`, `days` or `weeks`. Default `days`.
 
@@ -164,7 +166,9 @@ Please post an issues [here](https://github.com/movestore/Point-Cluster-Detectio
 
 **Setting `rad`:** Radius NULL defaults to 200 m. Too small radii might lead to small clusters, please include location inaccuracies here.
 
-**Setting `dur`:** Duration NULL defaults to 14 (days). Too large durations might lead to few clusters.
+**Setting `dur`:** Duration NULL defaults to 1 (day). Too large durations might lead to few clusters.
+
+**Setting `minloc`:** Number NULL defaults to 1. Too large values might lead to few clusters.
 
 **Setting `dur_unit`:** Duration defaults to `days`. Only regular time units can be used (see above).
 

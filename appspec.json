@@ -32,6 +32,13 @@
       "type": "DOUBLE"
     },
 	{
+      "id": "minloc",
+      "name": "Minimum number of locations building a cluster",
+      "description": "Provide the minimum number of locations that you want to make up a cluster for including it in your results. Defaults to 1 location.",
+      "defaultValue": 1,
+      "type": "DOUBLE"
+    },
+	{
       "id": "dur_unit",
       "name": "Time duration unit",
       "description": "Select the unit for your duration time variable.",
