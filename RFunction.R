@@ -190,10 +190,13 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     
     # load remove locations file and take out clusters in rad radius around them
     #remo_file_path <- "./data/local_app_files/uploaded-app-files/" 
-    remo_file_path <- getAppFilePath("remo_sites") #ask Clemens -this does not work without fallback???
-    if ("remove.csv" %in% list.files(remo_file_path))
+    #remo_file_path <- getAppFilePath("remo_sites") #returns NULL if no fallback
+    remo_file_name <- getAuxiliaryFilePath("remo_sites") #returns NULL if no fallback
+
+    #if ("remove.csv" %in% list.files(remo_file_path)) #no sure what this would have done without fallback
+    if (!is.null(remo_file_name))
     {
-     remo <- read.csv(paste0(remo_file_path,"remove.csv"),header=TRUE)
+     remo <- read.csv(remo_file_name,header=TRUE)
      if ("latitude" %in% names(remo) & "longitude" %in% names(remo))
      {
        logger.info(paste("You have uploaded a file with",length(remo$latitude),"locations to remove from the set of clusters."))
@@ -208,7 +211,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
          maxuselat <- maxuselat[-out]
          logger.info(paste0(length(out)," clusters were removed from your results, because they were close (< ",rad," m) to the provided remove locations'."))
        } else logger.info("None of your provided remove locations were close to a cluster.")
-     } else logger.info ("Your remove.csv file does not include the required columns longitude and latitude. Your required remove locations cannot be taken into account.")
+     } else logger.info ("Your csv file does not include the required columns longitude and latitude. Your required remove locations cannot be taken into account.")
     }
     
     result <- data[data$clusterID %in% cluID,] #these are all locations that are in any (non-remove) cluster with difftime>dur

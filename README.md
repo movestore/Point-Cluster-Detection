@@ -14,7 +14,7 @@ For buffer clustering all locations are transformed into a circular spatial poly
 
 For hierarchical clustering the `average` method is used, i.e. the clusters are defined at the minimum average distance between all locations of the clusters. Clusters are selected to have at least a radius of `cluster radius` or be `2 * cluster radius` apart. Only clusters that were used for at least the specified number of hours/days/weeks are returned.
 
-If one has uploaded a local file called 'remove.csv' of locations (column names must be `longitute` and `latitude`!), this App will automatically exclude those clusters that have centre points less than `rad` metre from the locations of 'remove.csv'. That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis.
+If one has uploaded a comma-separated user file (csv!) of locations (column names must be `longitute` and `latitude`!), this App will automatically exclude those clusters that have centre points less than `rad` metre from the provided locations. That way, fixed stations like nests or other points of attraction can be excluded from the results of this cluster analysis. Note that the previously required name of this file ('remove.csv') is not necessary any more.
 
 According to the maxgap parameter, clusters with usage gaps larger than the defined value are split.
 

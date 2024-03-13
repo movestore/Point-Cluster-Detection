@@ -122,8 +122,8 @@
 	{
       "id": "remo_sites",
       "name": "Locations of nests, roost or other sites to remove.",
-      "description": "You can upload a comma separated(li file called 'remove.csv'(!) with locations of nest sites, roosts or other known sites that you do not want to consider as cluster sites. They will be removed from the results. Note that the provided locations must be formatted as longitute/latitute in WGS84 projection, in decimal degrees and listed in two columns with headers called 'longitude' and 'latitude'. If no file is provided, then all clusters will be extracted.",
-      "type": "LOCAL_FILE"
+      "description": "You can upload one comma separated csv-file(!) of any name with locations of nest sites, roosts or other known sites that you do not want to consider as cluster sites. They will be removed from the results. Note that the provided locations must be formatted as longitute/latitute in WGS84 projection, in decimal degrees and listed in two columns with headers called 'longitude' and 'latitude'. If no file is provided, then all clusters will be extracted.",
+      "type": "USER_FILE"
     }
   ],
   "dependencies": {
