@@ -237,8 +237,29 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     if(length(heightix)>0) heightname <- names(result)[min(heightix)] else heightname <- NA
     
     #add tag_local_identifier to results
-    if("tag_local_identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag_local_identifier")
-    if("tag.local.identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag.local.identifier")
+    if("tag_local_identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag_local_identifier",.keep=TRUE)
+    #if("tag.local.identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag.local.identifier",.keep=TRUE)
+
+    # add track resolutions from file
+    fixrates_file_name <- getAuxiliaryFilePath("track_fixrates") #returns NULL if no fallback
+    
+    if (!is.null(fixrates_file_name))
+    {
+      fixr <- read.csv(fixrates_file_name,header=TRUE)
+      if ("trackid" %in% names(fixr) & "fixrate" %in% names(fixr))
+      {
+        logger.info(paste("You have uploaded a file with",length(fixr$fixrate),"trackids to which fix rates (unit=per hour; must be regular) will be added in the output rds."))
+        for (j in seq(along=fixr$trackid)) 
+        {
+          if (fixr$trackid[j] %in% mt_track_id(result)) 
+          {
+            mt_track_data(result)[mt_track_id(result)==fixr$trackid[j],] <- fixr$fixrate[j]
+            logger.info(paste("fixrate of track",fixr$trackid[j],"added to rds output."))
+          } else logger.info(paste("trackid",fixr$trackid[j],"is not available in the data set."))
+        result <- mt_as_event_attribute(result,"fixrate",.keep=TRUE)
+        } else logger.info("None of your provided trackids matched to the input data set, please check if their spelling is correct.")
+      } else logger.info ("Your csv file does not include the required columns trackid and fixrate. These cannot be added to your results object.")
+    }
 
     #cluster table
     n.locs <- apply(matrix(cluID), 1, function(x) length(which(result$clusterID==x)))
@@ -246,7 +267,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     id.names <- apply(matrix(cluID), 1, function(x) paste(unique(mt_track_id(result)[result$clusterID==x]),collapse=", "))
     id.tags <- rep(NA,length(n.ids))
     if("tag_local_identifier" %in% names(result)) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result[result$clusterID==x,]$tag_local_identifier),collapse=", "))
-    if("tag.local.identifier" %in% names(result)) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result[result$clusterID==x,]$tag.local.identifier),collapse=", "))
+    #if("tag.local.identifier" %in% names(result)) id.tags <- apply(matrix(cluID), 1, function(x) paste(unique(result[result$clusterID==x,]$tag.local.identifier),collapse=", "))
 
     # add cumlag.locs (sum of timelags of each location in cluster) - addition from Sep 2022
     #result$timelag <- unlist(lapply(timeLag(result, units=dur_unit), function(x) c(as.vector(x), NA)))
