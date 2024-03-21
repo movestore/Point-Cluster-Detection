@@ -32,13 +32,6 @@
       "type": "DOUBLE"
     },
 	{
-      "id": "minloc",
-      "name": "Minimum number of locations building a cluster",
-      "description": "Provide the minimum number of locations that you want to make up a cluster for including it in your results. Defaults to 1 location.",
-      "defaultValue": 1,
-      "type": "DOUBLE"
-    },
-	{
       "id": "dur_unit",
       "name": "Time duration unit",
       "description": "Select the unit for your duration time variable.",
@@ -62,6 +55,13 @@
           "displayText": "week(s)"
         }
       ]
+    },
+	{
+      "id": "minloc",
+      "name": "Minimum number of locations building a cluster",
+      "description": "Provide the minimum number of locations that you want to make up a cluster for including it in your results. Defaults to 1 location.",
+      "defaultValue": 1,
+      "type": "DOUBLE"
     },
 	{
       "id": "maxgap",
@@ -123,6 +123,12 @@
       "id": "remo_sites",
       "name": "Locations of nests, roost or other sites to remove.",
       "description": "You can upload one comma separated csv-file(!) of any name with locations of nest sites, roosts or other known sites that you do not want to consider as cluster sites. They will be removed from the results. Note that the provided locations must be formatted as longitute/latitute in WGS84 projection, in decimal degrees and listed in two columns with headers called 'longitude' and 'latitude'. If no file is provided, then all clusters will be extracted.",
+      "type": "USER_FILE"
+    },
+	{
+      "id": "track_fixrates",
+      "name": "Fix rates of included tracks.",
+      "description": "You can upload one comma separated csv-file(!) of any name with fix rates of the used tracks. They will be added to the output file (passed on to the next App) and the file `Points_with_Clusters.csv`. Note that the track IDs must be written exactly as in the data set. If unsure, please check the Cargo Agent of the preceding App. Note furthermore that the provided fixrates must be in the unit `per hour` and columns must be called 'trackid' and 'fixrate'. If no file is provided, then nothing will be added to the result files.",
       "type": "USER_FILE"
     }
   ],

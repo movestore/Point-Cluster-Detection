@@ -1,5 +1,5 @@
 {
-    "meth": "hclust",
+    "meth": "buff",
     "rad": 200,
     "dur": 1,
     "minloc": 1,

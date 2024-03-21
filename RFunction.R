@@ -249,15 +249,21 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
       if ("trackid" %in% names(fixr) & "fixrate" %in% names(fixr))
       {
         logger.info(paste("You have uploaded a file with",length(fixr$fixrate),"trackids to which fix rates (unit=per hour; must be regular) will be added in the output rds."))
+        fixrates_4result <- data.frame("trackid"=mt_track_data(result)[,mt_track_id_column(result)],"fixrate"=NA)
+        names(fixrates_4result)[1] <- "trackid"
         for (j in seq(along=fixr$trackid)) 
         {
-          if (fixr$trackid[j] %in% mt_track_id(result)) 
+          if (fixr$trackid[j] %in% fixrates_4result$trackid) 
           {
-            mt_track_data(result)[mt_track_id(result)==fixr$trackid[j],] <- fixr$fixrate[j]
+            fixrates_4result$fixrate[fixrates_4result$trackid==fixr$trackid[j]] <- fixr$fixrate[j]
             logger.info(paste("fixrate of track",fixr$trackid[j],"added to rds output."))
-          } else logger.info(paste("trackid",fixr$trackid[j],"is not available in the data set."))
-        result <- mt_as_event_attribute(result,"fixrate",.keep=TRUE)
-        } else logger.info("None of your provided trackids matched to the input data set, please check if their spelling is correct.")
+          } else logger.info(paste("trackid",fixr$trackid[j],"is not available in the data set. check your spelling."))
+        }
+        result <- result |>
+          mutate_track_data(fixrate = fixrates_4result$fixrate)
+        result <- mt_as_event_attribute(result,"fixrate")
+        result <- result |>
+          mutate_track_data(fixrate = fixrates_4result$fixrate)
       } else logger.info ("Your csv file does not include the required columns trackid and fixrate. These cannot be added to your results object.")
     }
 
@@ -349,7 +355,7 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     result$n.locsout <- apply(matrix(result$clusterID), 1, function(x) n.locsout[which(cluID==x)])
 
     #inlcude only the listed variables into result csv, in given order
-    expnames <- c("test","clusterID","tag_local_identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","individual_name_deployment_id","ground_speed","heading","clu.centr.long","clu.centr.lat","clu.maxuse.long","clu.maxuse.lat") 
+    expnames <- c("test","clusterID","tag_local_identifier","n.ids","n.locs","cumlag.locs","n.locsout","n.revs","timestamp.local","location.long","location.lat","date.local","time.local","local.timezone","individual_name_deployment_id","ground_speed","heading","clu.centr.long","clu.centr.lat","clu.maxuse.long","clu.maxuse.lat","fixrate") 
     result.df <- data.frame(result)
     if (!is.na(heightname))
     {

@@ -136,6 +136,8 @@ n.locsout:			number of locations outside the cluster to which this location belo
 
 n.revs: 			number of revisits of cluster (i.e. number of times individuals leave cluster and come back, summed over all individuals that use the cluster
 
+fixrate: 			user-provided fixrate for each track (added to be passed on to EarthRanger by their App for prioristation issues)
+
 
 ### Settings 
 **Cluster Method (`meth`):** Method to cluster points, either `buff` or `hclust`. See details above in Documentation. Default `buff`.
@@ -157,6 +159,8 @@ n.revs: 			number of revisits of cluster (i.e. number of times individuals leave
 **Y - number of hours representing 'new' (`new_dur`):** Number of hours that data set shall be compared with to extract only 'new' clusters. Defaults to 24 (h).
 
 **Locations of nests, roost or other sites to remove. (`remo_sites`):** A csv-file with locations, close to which clusters shall be excluded. Defaults to no file.
+
+**Fix rates of the included tracks. (`track_fixrates`):** A csv-file with trackids and fixrates to be added to the output.rds and `Points_With_Clusters.csv` for use in Apps down the line. Mind the spelling of trackids in your data set and also column names 'trackid' and 'fixrate'.
 
 ### Most common errors
 Please post an issues [here](https://github.com/movestore/Point-Cluster-Detection/issues) if you encounter recurring errors or problems.
