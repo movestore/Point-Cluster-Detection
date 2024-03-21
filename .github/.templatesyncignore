@@ -3,6 +3,8 @@ README.md
 renv/
 *.Rproj
 appspec.json
+app-configuration.json
+data/auxiliary/
 tests/testthat/test_RFunction.R
 # backward compatibility
 co-pilot-sdk.R
