@@ -237,12 +237,19 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     if(length(heightix)>0) heightname <- names(result)[min(heightix)] else heightname <- NA
     
     #add tag_local_identifier to results
-    if ("tag_local_identifier" %in% names(mt_track_data(result))) 
-    {
-      result <- mt_as_event_attribute(result,"tag_local_identifier")
-      result <- mt_as_track_attribute(result,"tag_local_identifier",.keep=TRUE)
-    }
-    
+    #mt_as_event_attribute_AK <- function(x,nm) -> this function not necessary, as already mt_track_data dont fit!
+    #{
+    #  utid <- as.data.frame(mt_track_data(result)[,mt_track_id_column(x)])[,1]
+    #  nm_events <- character(dim(x)[1])
+    #  for (i in seq(along=utid))
+    #  {
+    #    ix <- which(mt_track_id(result)==utid[i])
+    #    nm_events[ix] <- as.character(as.data.frame(mt_track_data(result))[i,nm])
+    #  }
+    #  result[,nm] <- nm_events
+    #  return(result)
+    #}
+    if ("tag_local_identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag_local_identifier",.keep=TRUE)
     #if("tag.local.identifier" %in% names(mt_track_data(result))) result <- mt_as_event_attribute(result,"tag.local.identifier",.keep=TRUE)
 
     # add track resolutions from file
