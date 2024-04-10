@@ -11,8 +11,7 @@ library('terra')
 
 rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="days", maxgap=1, gap_unit="days", clu_transm="all", new_dur=24, data, ...) {
   Sys.setenv(tz="UTC")
-  #time_now <- Sys.time()
-  time_now <- as.POSIXct("2024-03-21 00:00:00")
+  time_now <- Sys.time()
   if (("timestamp" %in% (names(data)))==FALSE) data$timestamp <- mt_time(data)
   
   if (is.null(rad))
