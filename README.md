@@ -154,7 +154,7 @@ fixrate: 			user-provided fixrate for each track (added to be passed on to Earth
 
 **Gap duration unit (`gap_unit`):** Duration unit for variable `maxgap`. Can be `hours`, `days` or `weeks`. Default `days`.
 
-**Cluster Transmission Mode (`clu_transm`):** Setting to allow only returning 'new' clusters that were not detected with the data set excluding the previous Y hours. Defaults to returning all clusters.
+**Cluster Transmission Mode (`clu_transm`):** Setting to allow only returning 'new' clusters (that were not detected with the data set excluding the previous Y hours) or 'new and expanded' clusters (that include at least one locations from the previous Y hours). Defaults to returning all clusters.
 
 **Y - number of hours representing 'new' (`new_dur`):** Number of hours that data set shall be compared with to extract only 'new' clusters. Defaults to 24 (h).
 

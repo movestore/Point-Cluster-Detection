@@ -6,6 +6,6 @@
     "dur_unit": "hours",
     "maxgap": 1,
     "gap_unit": "days",
-    "clu_transm": "all",
+    "clu_transm": "new",
     "new_dur": 96
 }

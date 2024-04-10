@@ -7,11 +7,12 @@ library('terra')
 
 # to do:
 # 1. redo all with sf
-# 2. add to output (and csvs): "most common location", i.e. for each cluster cut off at 4 or 5 decimals (round), make table and select location with most occurances (radius 5-10 or 20-30m should be ok) --> rather with extra radius and hclust (clusters within clusters)
+# 2. add to output (and csvs): "most common location", i.e. for each cluster cut off at 4 or 5 decimals (round), make table and select location with most occurrences (radius 5-10 or 20-30m should be ok) --> rather with extra radius and hclust (clusters within clusters)
 
 rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="days", maxgap=1, gap_unit="days", clu_transm="all", new_dur=24, data, ...) {
   Sys.setenv(tz="UTC")
-  time_now <- Sys.time()
+  #time_now <- Sys.time()
+  time_now <- as.POSIXct("2024-03-21 00:00:00")
   if (("timestamp" %in% (names(data)))==FALSE) data$timestamp <- mt_time(data)
   
   if (is.null(rad))
@@ -122,7 +123,8 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
   cluID <- cluID[!is.na(cluID)]
   
   ### if asked for reduced transmission, here cluster with data minus new locations and compare (note that cannot user clusterIDs, but need locations)
-  ## strategy: look through the clusters of "all", for each check if all old locations are in a same cluster of the "old" cluster set, if so, then mark to remove from cluID list
+  ## strategy: look through the clusters of "all", for each check if all old locations are in a same cluster of the "old" cluster set, if so, then mark to remove from cluID list,
+  ## new addition: third setting to transmit "new and expanded" clustes, i.e. all that include locations of the new day/time itv.
 
   if (clu_transm=="new")
   {
@@ -148,9 +150,9 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
     old_cluix <- numeric() # indices of "old" clusters that can be removed from "all" set
     for (k in seq(along=cluID)) #now look at each of the "all" clusters
     {
-      locix_k <- which(memb==cluID[k])
+      locix_k <- which(data$clusterID==cluID[k])
       sel_old <- difftime(time_now,mt_time(data)[locix_k],units="hours") > new_dur #which are old locations
-      if (sum(sel_old)>0) 
+      if (any(sel_old)) #at least one location must be old
       {
         locix_ko <- locix_k[sel_old]
         locix_ko_old <- which(timetrack_old %in% timetrack_all[locix_ko])
@@ -158,8 +160,48 @@ rFunction = function(meth="buff", rad=NULL, dur=NULL, minloc=NULL, dur_unit="day
       }
     }
     cluID <- cluID[-old_cluix]
-    logger.info(paste(length(old_cluix),"clusters were removed from the complete list, as they were fully included in clusters calculated from the data excluding the previous",new_dur,"hours.",length(cluID),"'new' clusters are in the remaining list."))
+    logger.info(paste(length(old_cluix),"clusters were removed from the complete list, as they were full subsets of clusters calculated from the data excluding the previous",new_dur,"hours.",length(cluID),"'new' clusters are in the remaining list, i.e. clusters that did not contain any new locations."))
   }
+  
+  if (clu_transm=="newexp")
+  {
+    logger.info(paste("You have selected to only transmit clusters that include most recent locations (past",new_dur,"hours). These are new clusters and old clusters that are still active."))
+    
+    dataold <- data[mt_time(data) < time_now-hours(new_dur),]
+    if (meth=="buff")
+    {
+      membold <- meth_buff(dataold,rad)
+    } else if (meth=="hclust") #cannot handle very much data, 
+    {
+      membold <- meth_hclust(dataold,rad)
+    }
+    
+    membold <- as.character(membold) #changed to character for splitting possibility
+    cluID_allold <- unique(membold)
+    dataold$clusterID <- membold
+    
+    #must match both data sets with trackid and timestamp
+    timetrack_all <- paste(mt_time(data),mt_track_id(data),sep=",")
+    timetrack_old <- paste(mt_time(dataold),mt_track_id(dataold),sep=",")
+    
+    old2_cluix <- numeric() # indices of "old" clusters that can be removed from "all" set in terms of "newexp"
+    for (k in seq(along=cluID)) #look at each of the "all" clusters
+    {
+      locix_k <- which(data$clusterID==cluID[k])
+      sel_old2 <- difftime(time_now,mt_time(data)[locix_k],units="hours") > new_dur #which are old locations
+      print(k)
+      print(timetrack_all[locix_k])
+      if (all(sel_old2))  #all locations must be old
+      {
+        locix_ko <- locix_k[sel_old2]
+        locix_ko_old <- which(timetrack_old %in% timetrack_all[locix_ko])
+        if (length(unique(membold[locix_ko_old]))==1) old2_cluix <- c(old2_cluix,k) #if all old locations belong to the same old cluster, remove cluster
+      }
+    }
+    cluID <- cluID[-old2_cluix]
+    logger.info(paste(length(old2_cluix),"clusters were removed from the complete list, as they were identical to clusters calculated from the data excluding the previous",new_dur,"hours.",length(cluID),"'new and expanded' clusters are in the remaining list, i.e. clusters that contain new locations."))
+  }
+  
 # from here all is based on this list of cluIDs
  
   if (length(cluID)>0) #include here to calc. number of locations/bursts not in cluster - see below

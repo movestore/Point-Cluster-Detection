@@ -107,6 +107,10 @@
           "displayText": "Pass on all clusters."
         },
 		{
+          "value": "newexp",
+          "displayText": "Pass on new and expanded clusters."
+        },
+		{
           "value": "new",
           "displayText": "Pass on only new clusters."
         }
