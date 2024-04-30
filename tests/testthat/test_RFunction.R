@@ -1,6 +1,6 @@
-library('move2')
+library("move2")
 
-test_data <- test_data("input3_move2.rds") #file must be move2!
+test_data <- test_data("input3_move2.rds") # file must be move2!
 
 test_that("dur_unit mins executes", {
   actual <- rFunction(data = test_data, dur_unit = "mins")
