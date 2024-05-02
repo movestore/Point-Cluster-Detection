@@ -155,6 +155,9 @@
       },
 	  {
         "name": "terra"
+      },
+    {
+        "name": "stringr"
       }
     ]
   },

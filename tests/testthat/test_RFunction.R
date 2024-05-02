@@ -14,3 +14,17 @@ test_that("gap_unit mins executes", {
   expected_count <- 0
   expect_equal(nrow(actual), expected_count)
 })
+
+
+test_that("dur_unit non mins executes", {
+  actual <- rFunction(data = test_data, dur_unit = "days")
+  expected_count <- 359
+  expect_equal(nrow(actual), expected_count)
+})
+
+
+test_that("gap_unit non mins executes", {
+  actual <- rFunction(data = test_data, gap_unit = "days")
+  expected_count <- 359
+  expect_equal(nrow(actual), expected_count)
+})

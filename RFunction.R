@@ -4,6 +4,7 @@ library("lubridate")
 library("lutz")
 library("sf")
 library("terra")
+library("stringr")
 
 # to do:
 # 1. redo all with sf
