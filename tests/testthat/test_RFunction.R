@@ -1,13 +1,16 @@
-library('move2')
+library("move2")
 
-test_data <- test_data("input3_move2.rds") #file must be move2!
+test_data <- test_data("input3_move2.rds") # file must be move2!
 
-test_that("happy path", {
-  actual <- rFunction(data = test_data, sdk = "unit test", year = 2005)
-  expect_equal(unique(lubridate::year(mt_time(actual))), 2005)
+test_that("dur_unit mins executes", {
+  actual <- rFunction(data = test_data, dur_unit = "mins")
+  expected_count <- 821
+  expect_equal(nrow(actual), expected_count)
 })
 
-test_that("year not included", {
-  actual <- rFunction(data = test_data, sdk = "unit test", year = 2023)
-  expect_null(actual)
+
+test_that("gap_unit mins executes", {
+  actual <- rFunction(data = test_data, gap_unit = "mins")
+  expected_count <- 0
+  expect_equal(nrow(actual), expected_count)
 })
